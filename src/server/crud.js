@@ -4,11 +4,13 @@ import { open } from 'sqlite';
 import bodyParser from 'body-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cors from 'cors'; // ⚠️ Importante: Para integrar o front-end React com este back-end, é necessário que o CORS esteja habilitado.
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(cors()); // Permite que o front-end acesse o back-end e caso precise o comando para baixar a dependência é: npm install cors
 app.use(bodyParser.json());
 
 const dbPath = path.join(__dirname, '../database/database.db');
