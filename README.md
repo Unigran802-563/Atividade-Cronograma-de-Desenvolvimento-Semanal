@@ -11,6 +11,14 @@ Criação do Banco de Dados
 
 Para criar o banco de dados, abra o terminal do VS Code, acesse a pasta do projeto, entre no diretório database e execute o comando node criarDatabase.js. Ao rodar esse comando, o arquivo database.db será criado automaticamente com toda a estrutura das tabelas e relacionamentos definidos no script SQL.
 
+Reset do Banco de Dados
+
+Para limpar todos os dados do banco (database.db) e manter apenas a estrutura das tabelas, utilize o script SQL deletarDatabase.sql localizado na pasta src/database.
+
+No VS Code, siga estes passos: abra o terminal, pressione Ctrl + Shift + P e selecione SQLite: New Query. Escolha o banco de dados do projeto (database.db), abra o arquivo deletarDatabase.sql ou cole seu conteúdo na query, selecione todo o código (Ctrl + A) e execute a query (Run Query ou clique duplo no código e daí aparece a opção de Run Query). Uma nova aba mostrará os resultados e você poderá confirmar que todas as tabelas foram limpas.
+
+Observação: os valores monetários e relacionamentos serão resetados, mas a estrutura do banco permanece intacta.
+
 Back-End (Node.js)
 
 O back-end foi configurado na pasta server, no arquivo crud.js, que realiza as operações de criação, leitura, atualização e exclusão (CRUD) no banco SQLite. Para iniciar o servidor individualmente, execute node src/server/crud.js. Após a execução, o servidor ficará ativo e disponível localmente, normalmente no endereço http://localhost:3001
