@@ -1,0 +1,48 @@
+.home-page {
+  padding: var(--espacamento-lg);
+}
+
+.home-page h1 {
+  color: var(--cor-roxo);
+  font-size: 2.5rem;
+  margin-bottom: var(--espacamento-sm);
+}
+
+.home-page p {
+  color: var(--cor-texto-secundario);
+  font-size: 1.2rem;
+  margin-bottom: var(--espacamento-xl);
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--espacamento-md);
+}
+
+.card {
+  background-color: var(--cor-preto-claro);
+  border: 2px solid var(--cor-roxo);
+  border-radius: var(--border-radius-lg);
+  padding: var(--espacamento-lg);
+  text-align: center;
+  transition: var(--transition-normal);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--cor-verde);
+}
+
+.card h3 {
+  color: var(--cor-texto-principal);
+  font-size: 1.2rem;
+  margin-bottom: var(--espacamento-sm);
+}
+
+.card-number {
+  color: var(--cor-verde);
+  font-size: 3rem;
+  font-weight: bold;
+}

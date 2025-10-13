@@ -1,9 +1,6 @@
-/* ========================================
-   ARQUIVO: src/components/layout/MainLayout.jsx
-   ======================================== */
 
 import { Outlet } from 'react-router-dom';
-import Sidebar from './SideBar.jsx';
+import Sidebar from './SideBar';
 import './MainLayout.css';
 
 function MainLayout() {
