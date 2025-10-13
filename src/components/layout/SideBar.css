@@ -1,0 +1,91 @@
+/* ========================================
+   ARQUIVO: src/components/layout/Sidebar.css
+   ======================================== */
+
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--cor-preto-claro);
+  border-right: 2px solid var(--cor-roxo);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+}
+
+/* Header da Sidebar */
+.sidebar-header {
+  padding: var(--espacamento-lg) var(--espacamento-md);
+  background: linear-gradient(135deg, var(--cor-roxo) 0%, var(--cor-roxo-escuro) 100%);
+  border-bottom: 2px solid var(--cor-verde);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--cor-texto-principal);
+  margin-bottom: var(--espacamento-xs);
+}
+
+.sidebar-subtitle {
+  font-size: 0.85rem;
+  color: var(--cor-texto-secundario);
+  font-weight: 300;
+}
+
+/* Navegação */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--espacamento-md) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-xs);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento-sm);
+  padding: var(--espacamento-md) var(--espacamento-lg);
+  color: var(--cor-texto-secundario);
+  text-decoration: none;
+  transition: var(--transition-fast);
+  border-left: 3px solid transparent;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background-color: var(--cor-cinza-escuro);
+  color: var(--cor-texto-principal);
+  border-left-color: var(--cor-verde);
+}
+
+.nav-item.active {
+  background-color: var(--cor-cinza-escuro);
+  color: var(--cor-verde);
+  border-left-color: var(--cor-verde);
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+}
+
+.nav-text {
+  font-size: 1rem;
+}
+
+/* Footer da Sidebar */
+.sidebar-footer {
+  padding: var(--espacamento-md);
+  border-top: 1px solid var(--cor-cinza-escuro);
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--cor-texto-desabilitado);
+}
+

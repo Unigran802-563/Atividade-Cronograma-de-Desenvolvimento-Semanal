@@ -1,0 +1,26 @@
+/* ========================================
+   ARQUIVO: src/components/layout/MainLayout.css
+   ======================================== */
+
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--cor-preto);
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  padding: var(--espacamento-lg);
+  background-color: var(--cor-preto);
+  min-height: 100vh;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: var(--espacamento-md);
+  }
+}
+

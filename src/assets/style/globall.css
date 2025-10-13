@@ -1,0 +1,112 @@
+:root {
+  /* Cores principais */
+  --cor-roxo: #8B5CF6;
+  --cor-roxo-escuro: #6D28D9;
+  --cor-roxo-claro: #A78BFA;
+  
+  --cor-preto: #0F0F0F;
+  --cor-preto-claro: #1A1A1A;
+  --cor-cinza-escuro: #2A2A2A;
+  
+  --cor-verde: #10B981;
+  --cor-verde-escuro: #059669;
+  --cor-verde-claro: #34D399;
+  
+  /* Cores de texto */
+  --cor-texto-principal: #FFFFFF;
+  --cor-texto-secundario: #D1D5DB;
+  --cor-texto-desabilitado: #6B7280;
+  
+  /* Espaçamentos */
+  --espacamento-xs: 0.5rem;
+  --espacamento-sm: 1rem;
+  --espacamento-md: 1.5rem;
+  --espacamento-lg: 2rem;
+  --espacamento-xl: 3rem;
+  
+  /* Tamanhos */
+  --sidebar-width: 250px;
+  --header-height: 60px;
+  
+  /* Bordas */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  
+  /* Transições */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--cor-preto);
+  color: var(--cor-texto-principal);
+  line-height: 1.6;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cor-preto-claro);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cor-roxo);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-roxo-escuro);
+}
+
+/* Utilitários */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--espacamento-md);
+}
+
+.btn {
+  padding: var(--espacamento-xs) var(--espacamento-md);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: var(--cor-roxo);
+  color: var(--cor-texto-principal);
+}
+
+.btn-primary:hover {
+  background-color: var(--cor-roxo-escuro);
+}
+
+.btn-success {
+  background-color: var(--cor-verde);
+  color: var(--cor-texto-principal);
+}
+
+.btn-success:hover {
+  background-color: var(--cor-verde-escuro);
+}
+
