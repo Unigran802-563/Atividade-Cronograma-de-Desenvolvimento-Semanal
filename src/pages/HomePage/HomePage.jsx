@@ -1,4 +1,3 @@
-
 import './HomePage.css';
 
 function HomePage() {
@@ -18,6 +17,10 @@ function HomePage() {
         </div>
         <div className="card">
           <h3>Clientes</h3>
+          <p className="card-number">0</p>
+        </div>
+        <div className="card">
+          <h3>Endereços</h3>
           <p className="card-number">0</p>
         </div>
         <div className="card">

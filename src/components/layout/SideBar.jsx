@@ -1,6 +1,5 @@
-
-import { NavLink } from 'react-router-dom';
-import './Sidebar.css';
+import { NavLink } from "react-router-dom";
+import "./Sidebar.css";
 
 function Sidebar() {
   return (
@@ -11,42 +10,62 @@ function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink 
-          to="/" 
-          className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
           end
         >
           <span className="nav-icon">🏠</span>
           <span className="nav-text">Home</span>
         </NavLink>
 
-        <NavLink 
-          to="/pratos" 
-          className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+        <NavLink
+          to="/pratos"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
         >
           <span className="nav-icon">🍽️</span>
           <span className="nav-text">Pratos</span>
         </NavLink>
 
-        <NavLink 
-          to="/ingredientes" 
-          className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+        <NavLink
+          to="/ingredientes"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
         >
           <span className="nav-icon">🥕</span>
           <span className="nav-text">Ingredientes</span>
         </NavLink>
 
-        <NavLink 
-          to="/clientes" 
-          className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+        <NavLink
+          to="/clientes"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
         >
           <span className="nav-icon">👥</span>
           <span className="nav-text">Clientes</span>
         </NavLink>
 
-        <NavLink 
-          to="/pedidos" 
-          className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}
+        <NavLink
+          to="/enderecos"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <span className="nav-icon">📍</span>
+          <span className="nav-text">Endereços</span>
+        </NavLink>
+
+        <NavLink
+          to="/pedidos"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
         >
           <span className="nav-icon">📋</span>
           <span className="nav-text">Pedidos</span>
@@ -61,4 +80,3 @@ function Sidebar() {
 }
 
 export default Sidebar;
-
