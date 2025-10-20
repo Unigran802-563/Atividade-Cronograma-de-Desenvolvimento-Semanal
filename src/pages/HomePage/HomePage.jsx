@@ -43,6 +43,10 @@ function HomePage() {
           <p className="card-number">0</p>
         </div>
         <div className="card">
+          <h3>Endereços</h3>
+          <p className="card-number">0</p>
+        </div>
+        <div className="card">
           <h3>Pedidos</h3>
           <p className="card-number">0</p>
         </div>

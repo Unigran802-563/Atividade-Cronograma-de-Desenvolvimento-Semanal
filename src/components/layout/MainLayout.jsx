@@ -1,4 +1,3 @@
-
 import { Outlet } from 'react-router-dom';
 import Sidebar from './SideBar';
 import './MainLayout.css';
