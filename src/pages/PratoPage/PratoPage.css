@@ -1,0 +1,597 @@
+/* ========================================
+   ARQUIVO: src/pages/PratoPage.css
+   ======================================== */
+
+.prato-page {
+  padding: var(--espacamento-lg);
+  min-height: 100vh;
+}
+
+/* Header da Página */
+.page-header {
+  margin-bottom: var(--espacamento-xl);
+}
+
+.page-header h1 {
+  color: #A78BFA;
+  font-size: 2.5rem;
+  margin-bottom: var(--espacamento-xs);
+  font-weight: 700;
+}
+
+.page-header p {
+  color: var(--cor-texto-secundario);
+  font-size: 1.1rem;
+}
+
+/* Container Principal */
+.prato-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espacamento-lg);
+}
+
+/* Cards */
+.prato-form-card,
+.prato-lista-card {
+  background-color: var(--cor-preto-claro);
+  border: 2px solid var(--cor-roxo);
+  border-radius: var(--border-radius-lg);
+  padding: var(--espacamento-lg);
+}
+
+.prato-form-card h2,
+.prato-lista-card h2 {
+  color: #A78BFA;
+  font-size: 1.5rem;
+  margin-bottom: var(--espacamento-md);
+  font-weight: 600;
+}
+
+/* Formulário */
+.prato-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-xs);
+}
+
+.form-group label {
+  color: var(--cor-texto-principal);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background-color: var(--cor-cinza-escuro);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-md);
+  padding: var(--espacamento-sm);
+  color: var(--cor-texto-principal);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--cor-roxo);
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espacamento-md);
+}
+
+/* Checkbox */
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento-xs);
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--cor-verde);
+}
+
+/* Botões do Formulário */
+.form-actions {
+  display: flex;
+  gap: var(--espacamento-sm);
+  margin-top: var(--espacamento-sm);
+}
+
+.btn {
+  padding: var(--espacamento-sm) var(--espacamento-lg);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-success {
+  background-color: var(--cor-verde);
+  color: white;
+  flex: 1;
+}
+
+.btn-success:hover {
+  background-color: var(--cor-verde-escuro);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: var(--cor-cinza-escuro);
+  color: var(--cor-texto-principal);
+}
+
+.btn-secondary:hover {
+  background-color: #3A3A3A;
+}
+
+/* Lista de Pratos */
+.prato-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-md);
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: var(--espacamento-xs);
+}
+
+.lista-vazia {
+  text-align: center;
+  color: var(--cor-texto-desabilitado);
+  padding: var(--espacamento-xl);
+  font-style: italic;
+}
+
+/* Item de Prato */
+.prato-item {
+  background-color: var(--cor-cinza-escuro);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-md);
+  padding: var(--espacamento-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition-fast);
+}
+
+.prato-item:hover {
+  border-color: var(--cor-roxo);
+  transform: translateX(5px);
+}
+
+.prato-info {
+  flex: 1;
+}
+
+.prato-info h3 {
+  color: var(--cor-texto-principal);
+  font-size: 1.2rem;
+  margin-bottom: var(--espacamento-xs);
+}
+
+.prato-descricao {
+  color: var(--cor-texto-secundario);
+  font-size: 0.9rem;
+  margin-bottom: var(--espacamento-sm);
+}
+
+.prato-detalhes {
+  display: flex;
+  gap: var(--espacamento-md);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.prato-preco {
+  color: var(--cor-verde);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.prato-categoria {
+  background-color: var(--cor-roxo);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.prato-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.prato-status.disponivel {
+  background-color: var(--cor-verde);
+  color: white;
+}
+
+.prato-status.indisponivel {
+  background-color: #EF4444;
+  color: white;
+}
+
+/* Ações */
+.prato-acoes {
+  display: flex;
+  gap: var(--espacamento-xs);
+}
+
+.btn-editar,
+.btn-deletar {
+  background-color: transparent;
+  border: 2px solid transparent;
+  padding: var(--espacamento-xs);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-fast);
+}
+
+.btn-editar:hover {
+  background-color: var(--cor-roxo);
+  border-color: var(--cor-roxo);
+}
+
+.btn-deletar:hover {
+  background-color: #EF4444;
+  border-color: #EF4444;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .prato-container {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 2rem;
+  }
+
+  .prato-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--espacamento-sm);
+  }
+
+  .prato-acoes {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+
+.prato-page {
+  padding: var(--espacamento-lg);
+  min-height: 100vh;
+}
+
+/* Header da Página */
+.page-header {
+  margin-bottom: var(--espacamento-xl);
+}
+
+.page-header h1 {
+  color: #A78BFA;
+  font-size: 2.5rem;
+  margin-bottom: var(--espacamento-xs);
+  font-weight: 700;
+}
+
+.page-header p {
+  color: var(--cor-texto-secundario);
+  font-size: 1.1rem;
+}
+
+/* Container Principal */
+.prato-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espacamento-lg);
+}
+
+/* Cards */
+.prato-form-card,
+.prato-lista-card {
+  background-color: var(--cor-preto-claro);
+  border: 2px solid var(--cor-roxo);
+  border-radius: var(--border-radius-lg);
+  padding: var(--espacamento-lg);
+}
+
+.prato-form-card h2,
+.prato-lista-card h2 {
+  color: #A78BFA;
+  font-size: 1.5rem;
+  margin-bottom: var(--espacamento-md);
+  font-weight: 600;
+}
+
+/* Formulário */
+.prato-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-xs);
+}
+
+.form-group label {
+  color: var(--cor-texto-principal);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background-color: var(--cor-cinza-escuro);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-md);
+  padding: var(--espacamento-sm);
+  color: var(--cor-texto-principal);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--cor-roxo);
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espacamento-md);
+}
+
+/* Checkbox */
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: var(--espacamento-xs);
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--cor-verde);
+}
+
+/* Botões do Formulário */
+.form-actions {
+  display: flex;
+  gap: var(--espacamento-sm);
+  margin-top: var(--espacamento-sm);
+}
+
+.btn {
+  padding: var(--espacamento-sm) var(--espacamento-lg);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-success {
+  background-color: var(--cor-verde);
+  color: white;
+  flex: 1;
+}
+
+.btn-success:hover {
+  background-color: var(--cor-verde-escuro);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: var(--cor-cinza-escuro);
+  color: var(--cor-texto-principal);
+}
+
+.btn-secondary:hover {
+  background-color: #3A3A3A;
+}
+
+/* Lista de Pratos */
+.prato-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacamento-md);
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: var(--espacamento-xs);
+}
+
+.lista-vazia {
+  text-align: center;
+  color: var(--cor-texto-desabilitado);
+  padding: var(--espacamento-xl);
+  font-style: italic;
+}
+
+/* Item de Prato */
+.prato-item {
+  background-color: var(--cor-cinza-escuro);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-md);
+  padding: var(--espacamento-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition-fast);
+}
+
+.prato-item:hover {
+  border-color: var(--cor-roxo);
+  transform: translateX(5px);
+}
+
+.prato-info {
+  flex: 1;
+}
+
+.prato-info h3 {
+  color: var(--cor-texto-principal);
+  font-size: 1.2rem;
+  margin-bottom: var(--espacamento-xs);
+}
+
+.prato-descricao {
+  color: var(--cor-texto-secundario);
+  font-size: 0.9rem;
+  margin-bottom: var(--espacamento-sm);
+}
+
+.prato-detalhes {
+  display: flex;
+  gap: var(--espacamento-md);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.prato-preco {
+  color: var(--cor-verde);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.prato-categoria {
+  background-color: var(--cor-roxo);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.prato-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.prato-status.disponivel {
+  background-color: var(--cor-verde);
+  color: white;
+}
+
+.prato-status.indisponivel {
+  background-color: #EF4444;
+  color: white;
+}
+
+/* Ações */
+.prato-acoes {
+  display: flex;
+  gap: var(--espacamento-xs);
+}
+
+.btn-editar,
+.btn-deletar {
+  background-color: transparent;
+  border: 2px solid transparent;
+  padding: var(--espacamento-xs);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-fast);
+}
+
+.btn-editar:hover {
+  background-color: var(--cor-roxo);
+  border-color: var(--cor-roxo);
+}
+
+.btn-deletar:hover {
+  background-color: #EF4444;
+  border-color: #EF4444;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .prato-container {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 2rem;
+  }
+
+  .prato-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--espacamento-sm);
+  }
+
+  .prato-acoes {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+

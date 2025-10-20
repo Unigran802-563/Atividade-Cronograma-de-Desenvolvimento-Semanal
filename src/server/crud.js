@@ -10,7 +10,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors()); // Permite que o front-end acesse o back-end e caso precise o comando para baixar a dependência é: npm install cors
+const corsOptions = {
+  origin: '*', // Permite qualquer origem. Para mais segurança, use 'http://localhost:PORTA_DO_SEU_FRONTEND'
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Garante que DELETE e PUT sejam permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions )); // Permite que o front-end acesse o back-end e caso precise o comando para baixar a dependência é: npm install cors
 app.use(bodyParser.json());
 
 const dbPath = path.join(__dirname, '../database/database.db');
@@ -176,40 +182,110 @@ app.delete('/estoque/:id', async (req, res) => {
   res.json({ message: 'Estoque deletado!' });
 });
 
-// -------------------- CRUD Prato --------------------
-// Criação
-app.post('/prato', async (req, res) => {
-  const { id_prato, nome, descricao, preco_centavos, categoria } = req.body;
-  const db = await openDb();
-  await db.run(
-    `INSERT INTO Prato (id_prato, nome, descricao, preco_centavos, categoria) VALUES (?, ?, ?, ?, ?)`,
-    [id_prato, nome, descricao, preco_centavos, categoria]
-  );
-  res.json({ message: 'Prato criado!' });
+app.post('/pratos', async (req, res) => {
+  const { nome, descricao, preco, categoria, disponivel } = req.body;
+  
+  try {
+    const db = await openDb();
+    
+    // Inserir prato (id_prato será auto-incrementado)
+    const result = await db.run(
+      `INSERT INTO Prato (nome, descricao, preco_centavos, categoria) 
+       VALUES (?, ?, ?, ?)`,
+      [nome, descricao, preco, categoria]
+    );
+    
+    res.json({ 
+      message: 'Prato criado com sucesso!', 
+      id: result.lastID 
+    });
+  } catch (err) {
+    console.error('Erro ao criar prato:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
-// Listagem
+
+// Listagem de Pratos
 app.get('/pratos', async (req, res) => {
-  const db = await openDb();
-  const pratos = await db.all('SELECT * FROM Prato');
-  res.json(pratos);
+  try {
+    const db = await openDb();
+    const pratos = await db.all('SELECT * FROM Prato');
+    
+    // Adicionar campo 'disponivel' como true por padrão
+    const pratosComDisponivel = pratos.map(prato => ({
+      ...prato,
+      id: prato.id_prato,
+      preco: prato.preco_centavos,
+      disponivel: true // Pode ajustar conforme sua lógica
+    }));
+    
+    res.json(pratosComDisponivel);
+  } catch (err) {
+    console.error('Erro ao listar pratos:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
-// Atualização
-app.put('/prato/:id', async (req, res) => {
+
+// Buscar Prato por ID
+app.get('/pratos/:id', async (req, res) => {
   const { id } = req.params;
-  const { nome, descricao, preco_centavos, categoria } = req.body;
-  const db = await openDb();
-  await db.run(
-    `UPDATE Prato SET nome=?, descricao=?, preco_centavos=?, categoria=? WHERE id_prato=?`,
-    [nome, descricao, preco_centavos, categoria, id]
-  );
-  res.json({ message: 'Prato atualizado!' });
+  
+  try {
+    const db = await openDb();
+    const prato = await db.get('SELECT * FROM Prato WHERE id_prato=?', [id]);
+    
+    if (!prato) {
+      return res.status(404).json({ error: 'Prato não encontrado' });
+    }
+    
+    res.json({
+      ...prato,
+      id: prato.id_prato,
+      preco: prato.preco_centavos,
+      disponivel: true
+    });
+  } catch (err) {
+    console.error('Erro ao buscar prato:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
-// Exclusão
-app.delete('/prato/:id', async (req, res) => {
+
+// Atualização de Prato
+app.put('/pratos/:id', async (req, res) => {
   const { id } = req.params;
-  const db = await openDb();
-  await db.run('DELETE FROM Prato WHERE id_prato=?', [id]);
-  res.json({ message: 'Prato deletado!' });
+  const { nome, descricao, preco, categoria, disponivel } = req.body;
+  
+  try {
+    const db = await openDb();
+    
+    await db.run(
+      `UPDATE Prato 
+       SET nome=?, descricao=?, preco_centavos=?, categoria=? 
+       WHERE id_prato=?`,
+      [nome, descricao, preco, categoria, id]
+    );
+    
+    res.json({ message: 'Prato atualizado com sucesso!' });
+  } catch (err) {
+    console.error('Erro ao atualizar prato:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Exclusão de Prato
+app.delete('/pratos/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const db = await openDb();
+    
+    await db.run('DELETE FROM Prato WHERE id_prato=?', [id]);
+    
+    res.json({ message: 'Prato deletado com sucesso!' });
+  } catch (err) {
+    console.error('Erro ao deletar prato:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // -------------------- CRUD Prato_Ingrediente --------------------
