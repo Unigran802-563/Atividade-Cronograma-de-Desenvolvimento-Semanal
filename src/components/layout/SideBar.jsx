@@ -6,6 +6,7 @@ import {
   FaCarrot,
   FaUsers,
   FaClipboardList,
+  FaLocationArrow,
 } from "react-icons/fa";
 import "./Sidebar.css";
 
@@ -74,7 +75,9 @@ function Sidebar() {
             isActive ? "nav-item active" : "nav-item"
           }
         >
-          <span className="nav-icon">📍</span>
+          <span className="nav-icon">
+            <FaLocationArrow/>
+          </span>
           <span className="nav-text">Endereços</span>
         </NavLink>
 
