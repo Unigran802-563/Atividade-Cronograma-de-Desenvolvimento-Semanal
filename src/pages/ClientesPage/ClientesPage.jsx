@@ -66,14 +66,14 @@ const ClientesPage = () => {
 
     let soma = 0;
     for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
-    let dig1 = (soma * 10) % 11;
-    dig1 = dig1 === 10 ? 0 : dig1;
+    let resto = soma % 11;
+    let dig1 = resto < 2 ? 0: 11 - resto;
     if (dig1 !== parseInt(cpf.charAt(9))) return false;
 
     soma = 0;
     for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
-    let dig2 = (soma * 10) % 11;
-    dig2 = dig2 === 10 ? 0 : dig2;
+    resto = soma % 11;
+    let dig2 = resto < 2 ? 0 : 11 - resto;
     if (dig2 !== parseInt(cpf.charAt(10))) return false;
 
     return true;
