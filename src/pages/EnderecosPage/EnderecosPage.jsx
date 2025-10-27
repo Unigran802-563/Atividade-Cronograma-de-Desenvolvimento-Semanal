@@ -16,6 +16,7 @@ const EnderecosPage = () => {
   const [mensagemTipo, setMensagemTipo] = useState(""); // 'sucesso' ou 'erro'
   const [editandoId, setEditandoId] = useState(null);
 
+  // NOTA: Para rodar, esta API deve estar ativa em http://localhost:3001
   const API_URL = "http://localhost:3001";
 
   useEffect(() => {
@@ -28,8 +29,8 @@ const EnderecosPage = () => {
       const data = await res.json();
       setEnderecos(data);
     } catch (err) {
-      setMensagem(`Erro ao buscar endereços: ${err.message}`);
-      setMensagemTipo("erro");
+      // Usando console.error em vez de setMensagem para evitar conflito com a interface de usuário
+      console.error(`Erro ao buscar endereços: ${err.message}`);
     }
   };
 
@@ -150,8 +151,12 @@ const EnderecosPage = () => {
     setMensagem("");
   };
 
+  // Simulação de modal de confirmação, pois window.confirm() não é permitido
   const handleDeletar = async (id) => {
-    if (!window.confirm("Deseja realmente deletar este endereço?")) return;
+    // Usando prompt simples para confirmação
+    const isConfirmed = prompt(`Deseja realmente deletar o endereço ID ${id}? Digite 'SIM' para confirmar.`);
+    if (isConfirmed !== 'SIM') return;
+    
     try {
       const res = await fetch(`${API_URL}/endereco/${id}`, {
         method: "DELETE",
@@ -173,141 +178,155 @@ const EnderecosPage = () => {
 
   return (
     <div className="container">
-      <h2>Cadastro de Endereço</h2>
-
-      <form onSubmit={handleSubmit} className="form-cadastro">
-        <label>ID Endereço</label>
-        <input
-          type="text"
-          name="id_endereco"
-          placeholder="ID Endereço"
-          value={formData.id_endereco}
-          onChange={handleChange}
-          required
-          disabled={editandoId}
-        />
-        <label>Rua</label>
-        <input
-          type="text"
-          name="rua"
-          placeholder="Rua"
-          value={formData.rua}
-          onChange={handleChange}
-          required
-        />
-        <label>Número</label>
-        <input
-          type="text"
-          name="numero"
-          placeholder="Número"
-          value={formData.numero}
-          onChange={handleChange}
-          required
-        />
-        <label>Bairro</label>
-        <input
-          type="text"
-          name="bairro"
-          placeholder="Bairro"
-          value={formData.bairro}
-          onChange={handleChange}
-          required
-        />
-        <label>Cidade</label>
-        <input
-          type="text"
-          name="cidade"
-          placeholder="Cidade"
-          value={formData.cidade}
-          onChange={handleChange}
-          required
-        />
-        <label>Estado (UF)</label>
-        <input
-          type="text"
-          name="estado"
-          placeholder="Ex: SP"
-          value={formData.estado}
-          onChange={handleChange}
-          maxLength={2}
-          required
-        />
-        <label>CEP</label>
-        <input
-          type="text"
-          name="cep"
-          placeholder="99999-999"
-          value={formData.cep}
-          onChange={handleChange}
-          required
-        />
-
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            type="submit"
-            className={editandoId ? "atualizar" : "cadastrar"}
-          >
-            {editandoId ? "Atualizar" : "Cadastrar"}
-          </button>
-          {editandoId && (
-            <button type="button" onClick={handleCancelar} className="cancelar">
-              Cancelar
-            </button>
-          )}
-        </div>
-      </form>
-
       {mensagem && (
         <p className={`mensagem ${mensagemTipo === "erro" ? "erro" : ""}`}>
           {mensagem}
         </p>
       )}
 
-      <h3>Lista de Endereços</h3>
-      {enderecos.length === 0 ? (
-        <p className="sem-registro">Nenhum endereço cadastrado ainda.</p>
-      ) : (
-        <table className="tabela-cadastro">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Rua</th>
-              <th>Número</th>
-              <th>Bairro</th>
-              <th>Cidade</th>
-              <th>Estado</th>
-              <th>CEP</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {enderecos.map((e) => (
-              <tr key={e.id_endereco}>
-                <td>{e.id_endereco}</td>
-                <td>{e.rua}</td>
-                <td>{e.numero}</td>
-                <td>{e.bairro}</td>
-                <td>{e.cidade}</td>
-                <td>{e.estado}</td>
-                <td>{e.cep}</td>
-                <td>
-                  <div className="button-group">
-                    <button className="editar" onClick={() => handleEditar(e)}>
-                      Editar
-                    </button>
-                    <button
-                      className="deletar"
-                      onClick={() => handleDeletar(e.id_endereco)}
-                    >
-                      Deletar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {/* CONTAINER GRID - APLICA O LAYOUT DE 2 COLUNAS */}
+      <div className="enderecos-container"> 
+
+        {/* 1. BLOCO DO FORMULÁRIO (CARD) - Esquerda */}
+        <div className="endereco-form-card">
+          <h2>Cadastro de Endereço</h2> 
+          
+          <form onSubmit={handleSubmit} className="form-cadastro">
+            <label>ID Endereço</label>
+            <input
+              type="text"
+              name="id_endereco"
+              placeholder="ID Endereço"
+              value={formData.id_endereco}
+              onChange={handleChange}
+              required
+              disabled={editandoId}
+            />
+            <label>Rua</label>
+            <input
+              type="text"
+              name="rua"
+              placeholder="Rua"
+              value={formData.rua}
+              onChange={handleChange}
+              required
+            />
+            <label>Número</label>
+            <input
+              type="text"
+              name="numero"
+              placeholder="Número"
+              value={formData.numero}
+              onChange={handleChange}
+              required
+            />
+            <label>Bairro</label>
+            <input
+              type="text"
+              name="bairro"
+              placeholder="Bairro"
+              value={formData.bairro}
+              onChange={handleChange}
+              required
+            />
+            <label>Cidade</label>
+            <input
+              type="text"
+              name="cidade"
+              placeholder="Cidade"
+              value={formData.cidade}
+              onChange={handleChange}
+              required
+            />
+            <label>Estado (UF)</label>
+            <input
+              type="text"
+              name="estado"
+              placeholder="Ex: SP"
+              value={formData.estado}
+              onChange={handleChange}
+              maxLength={2}
+              required
+            />
+            <label>CEP</label>
+            <input
+              type="text"
+              name="cep"
+              placeholder="99999-999"
+              value={formData.cep}
+              onChange={handleChange}
+              required
+            />
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                type="submit"
+                className={editandoId ? "atualizar" : "cadastrar"}
+              >
+                {editandoId ? "Atualizar" : "Cadastrar"}
+              </button>
+              {editandoId && (
+                <button type="button" onClick={handleCancelar} className="cancelar">
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
+        </div> {/* FIM DO ENDERECO-FORM-CARD */}
+
+
+        {/* 2. BLOCO DA LISTA (CARD) - Direita */}
+        <div className="endereco-lista-card">
+          <h3>Lista de Endereços</h3>
+          {enderecos.length === 0 ? (
+            <p className="sem-registro">Nenhum endereço cadastrado ainda.</p>
+          ) : (
+            <div style={{overflowX: 'auto'}}> {/* Permite rolagem horizontal da tabela em telas pequenas */}
+              <table className="tabela-cadastro">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Rua</th>
+                    <th>Número</th>
+                    <th>Bairro</th>
+                    <th>Cidade</th>
+                    <th>Estado</th>
+                    <th>CEP</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enderecos.map((e) => (
+                    <tr key={e.id_endereco}>
+                      <td>{e.id_endereco}</td>
+                      <td>{e.rua}</td>
+                      <td>{e.numero}</td>
+                      <td>{e.bairro}</td>
+                      <td>{e.cidade}</td>
+                      <td>{e.estado}</td>
+                      <td>{e.cep}</td>
+                      <td>
+                        <div className="button-group">
+                          <button className="editar" onClick={() => handleEditar(e)}>
+                            Editar
+                          </button>
+                          <button
+                            className="deletar"
+                            onClick={() => handleDeletar(e.id_endereco)}
+                          >
+                            Deletar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div> {/* FIM DO ENDERECO-LISTA-CARD */}
+
+      </div> {/* FIM DO ENDERECOS-CONTAINER */}
     </div>
   );
 };

@@ -1,216 +1,283 @@
+/* ========================================
+    ARQUIVO: style.css (DESIGN APRIMORADO)
+    - Mantém o layout de 2 colunas e a usabilidade compacta.
+    - Foca em estética mais profissional com mais contraste, sombras suaves e tabela aprimorada.
+    - Aplicado o grid para o enderecos-container e o brilho roxo nos cards.
+    ======================================== */
+
+/* Variáveis */
+:root {
+    --cor-roxo: #7C3AED; /* Roxo mais profundo para destaque */
+    --cor-roxo-claro: #A78BFA;
+    --cor-roxo-escuro: #6D28D9;
+    --cor-preto: #121212; /* Fundo mais escuro */
+    --cor-preto-claro: #1A1A1A; /* Fundo dos cards */
+    --cor-cinza-escuro: #2D2D2D; /* Input/Borda/Linha */
+    --cor-cinza-claro: #383838; /* Fundo de linhas alternadas da tabela */
+    --cor-texto-principal: #E5E7EB; /* Texto mais claro */
+    --cor-verde: #10B981;
+    --cor-verde-escuro: #047857;
+    --cor-texto-secundario: #9CA3AF;
+    --border-radius-lg: 12px;
+    --border-radius-md: 8px;
+    --espacamento-sm: 8px;
+    --espacamento-md: 12px;
+    --espacamento-lg: 16px;
+    --espacamento-xl: 24px;
+    --espacamento-2xl: 32px;
+    --transition-fast: 0.2s;
+    --shadow-deep: 0 10px 30px rgba(0, 0, 0, 0.6); /* Sombra mais profunda e suave */
+    /* NOVA VARIÁVEL: Roxo mais intenso para a borda (Brilho Lilás) */
+    --cor-borda-lilás: rgba(124, 58, 237, 0.6);
+}
+
 body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--cor-preto);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--cor-texto-principal);
+    margin: 0;
+    padding: 0;
+    background-color: var(--cor-preto);
+    font-family: 'Inter', sans-serif;
+    color: var(--cor-texto-principal);
+    font-size: 17px; /* Aumento sutil da fonte base para 17px */
 }
 
-.main-container {
-  width: 100%;
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
-  text-align: center;
-}
+/* ------------------------------------------------ */
+/* LAYOUT E ESTRUTURA (Layout de 2 Colunas) */
+/* ------------------------------------------------ */
 
-h1, h2, h3 {
-  text-align: center;
-  color: var(--cor-texto-principal);
-}
-
-nav {
-  margin-bottom: 20px;
-  text-align: center;
-  flex-wrap: wrap;
-}
-
-nav a {
-  text-decoration: none;
-  color: var(--cor-roxo);
-  margin: 0 5px;
-  transition: color var(--transition-fast);
-}
-
-nav a:hover {
-  color: var(--cor-roxo-claro);
-  text-decoration: underline;
-}
-
+/* Container Principal da Página */
 .container {
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto 40px auto;
-  padding: 20px;
-  background-color: var(--cor-preto-claro);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-md);
+    width: 95%; 
+    max-width: 1600px; /* AUMENTADO para 1600px */
+    margin: 40px auto;
+    padding: var(--espacamento-lg); 
 }
+
+/* CONTAINER: Aplica o layout de 2 colunas (Grid) para Endereços */
+.enderecos-container { 
+    display: grid;
+    /* ALTERADO: Proporção 1fr 1fr para que Cadastro e Lista tenham o mesmo tamanho (50% cada) */
+    grid-template-columns: 1fr 1fr; 
+    gap: var(--espacamento-xl); 
+    align-items: start; 
+}
+
+/* Responsividade: Transforma em coluna única em telas pequenas */
+@media (max-width: 1024px) {
+    .enderecos-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ------------------- ESTILO DOS CARDS INDIVIDUAIS ------------------- */
+
+/* Cards Base */
+.endereco-form-card,
+.endereco-lista-card {
+    padding: var(--espacamento-xl); /* Mais padding */
+    background-color: var(--cor-preto-claro); 
+    border-radius: var(--border-radius-lg); 
+    box-shadow: var(--shadow-deep); 
+    
+    /* BORDA LILÁS/ROXA E BRILHO MAIS FORTE */
+    border: 1px solid var(--cor-roxo-escuro); 
+    box-shadow: 0 0 20px var(--cor-borda-lilás), var(--shadow-deep); 
+}
+
+/* Card de Formulário (Bloco da Esquerda) */
+.endereco-form-card {
+    max-height: 85vh; 
+    overflow-y: auto; 
+}
+
+/* Card da Lista (Bloco da Direita) */
+.endereco-lista-card {
+    max-height: 85vh; 
+    /* Removendo o overflow-y: auto daqui, pois o overflow da tabela será tratado internamente
+       para que a tabela possa rolar horizontalmente se necessário, mas o card em si não */
+}
+
+/* Títulos Internos dos Cards */
+.endereco-form-card h2,
+.endereco-lista-card h3 {
+    color: var(--cor-roxo-claro); 
+    font-size: 1.8rem; /* AUMENTADO */
+    margin-bottom: var(--espacamento-md); 
+    border-bottom: 2px solid var(--cor-cinza-escuro); 
+    padding-bottom: var(--espacamento-sm); 
+    text-align: center; 
+}
+
+/* ------------------------------------------------ */
+/* ESTILOS DE FORMULÁRIO */
+/* ------------------------------------------------ */
 
 .form-cadastro {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacamento-md); 
 }
 
+/* Rótulos (Labels) */
 .form-cadastro label {
-  align-self: flex-start;
-  margin-bottom: 4px;
-  font-weight: bold;
-  color: var(--cor-texto-secundario);
+    font-size: 1.05rem; /* AUMENTADO */
+    color: var(--cor-texto-secundario); 
+    font-weight: 500;
+    margin-top: var(--espacamento-sm); /* Espaço entre campos */
 }
 
+/* Campos de Input/Select (Área de Digitação) */
 .form-cadastro input,
 .form-cadastro select {
-  padding: 8px;
-  border: 1px solid var(--cor-cinza-escuro);
-  border-radius: var(--border-radius-sm);
-  background-color: var(--cor-cinza-escuro);
-  color: var(--cor-texto-principal);
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 6px;
+    padding: var(--espacamento-md); 
+    font-size: 1.05rem; /* AUMENTADO */
+    border: 1px solid var(--cor-cinza-escuro); 
+    background-color: #222222; 
+    color: var(--cor-texto-principal);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-fast);
 }
 
 .form-cadastro input:focus,
 .form-cadastro select:focus {
-  outline: none;
-  border-color: var(--cor-roxo);
-  box-shadow: 0 0 5px var(--cor-roxo);
+    border-color: var(--cor-roxo); 
+    background-color: #282828;
+    box-shadow: 0 0 0 2px var(--cor-roxo-escuro); 
+    outline: none;
 }
 
-.form-cadastro button.cadastrar,
-.form-cadastro button.atualizar,
-.form-cadastro button.cancelar,
-button.adicionar {
-  padding: 8px 16px;
-  border: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  font-weight: bold;
-  transition: var(--transition-fast);
+/* Grupo de Botões (Ações do Formulário) */
+.form-cadastro > div[style*="display: flex"] {
+    margin-top: var(--espacamento-xl); 
+    padding-top: var(--espacamento-md); 
+    border-top: 1px solid var(--cor-cinza-escuro);
 }
 
+/* Botões de Ação (Estilo PUSH/Elevado) */
+.form-cadastro button {
+    padding: var(--espacamento-md) var(--espacamento-xl); 
+    font-size: 1.05rem; /* AUMENTADO */
+    font-weight: 600; 
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); 
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: white; /* Cor do texto padrão */
+}
+
+/* Cores dos Botões */
 .form-cadastro button.cadastrar {
-  background-color: var(--cor-verde);
-  color: var(--cor-texto-principal);
+    background-color: var(--cor-verde);
 }
-
 .form-cadastro button.cadastrar:hover {
-  background-color: var(--cor-verde-escuro);
+    background-color: var(--cor-verde-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.6);
 }
-
 .form-cadastro button.atualizar {
-  background-color: var(--cor-roxo);
-  color: var(--cor-texto-principal);
+    background-color: var(--cor-roxo);
 }
-
 .form-cadastro button.atualizar:hover {
-  background-color: var(--cor-roxo-escuro);
+    background-color: var(--cor-roxo-escuro);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.6);
 }
-
 .form-cadastro button.cancelar {
-  background-color: #dc3545;
-  color: white;
+    background-color: var(--cor-cinza-escuro); 
 }
-
 .form-cadastro button.cancelar:hover {
-  background-color: #b02a37;
+    background-color: #4A4A4A;
 }
 
+/* Botões da Tabela (Editar/Deletar) */
+.button-group button {
+    font-size: 0.95rem; /* AUMENTADO */
+    padding: 6px 10px;
+    margin-right: 5px;
+    box-shadow: none;
+}
+.button-group button.editar {
+    background-color: var(--cor-roxo-claro);
+}
+.button-group button.editar:hover {
+    background-color: var(--cor-roxo);
+}
+.button-group button.deletar {
+    background-color: #EF4444; /* Vermelho */
+}
+.button-group button.deletar:hover {
+    background-color: #DC2626;
+}
+
+
+/* Mensagens de feedback */
 .mensagem {
-  text-align: center;
-  margin-bottom: 8px;
-  color: var(--cor-verde-claro);
-  font-weight: bold;
+    padding: var(--espacamento-md);
+    margin-bottom: var(--espacamento-lg);
+    font-weight: 700;
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    background-color: var(--cor-verde);
+    color: var(--cor-preto-claro);
+    font-size: 1.05rem; /* AUMENTADO */
 }
 
 .mensagem.erro {
-  color: #f87171;
+    background-color: #DC2626; 
+    color: white;
+}
+
+/* ------------------------------------------------ */
+/* ESTILOS DA TABELA */
+/* ------------------------------------------------ */
+
+.tabela-cadastro {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--espacamento-lg); 
+}
+
+/* Tabela Headers */
+.tabela-cadastro thead th {
+    background-color: var(--cor-roxo-escuro); 
+    font-size: 1rem; /* AUMENTADO */
+    padding: var(--espacamento-md); 
+    text-align: left;
+    color: white;
+}
+
+/* Tabela Linhas */
+.tabela-cadastro tbody tr td {
+    padding: var(--espacamento-md); 
+    font-size: 1rem; /* AUMENTADO */
+}
+
+.tabela-cadastro tbody tr:nth-child(even) {
+    background-color: var(--cor-cinza-escuro); 
+}
+
+.tabela-cadastro tbody tr:nth-child(odd) {
+    background-color: var(--cor-preto-claro); 
+}
+
+.tabela-cadastro tbody tr:hover {
+    background-color: var(--cor-roxo); 
+    color: white;
+    transition: all var(--transition-fast);
+}
+
+.tabela-cadastro td {
+    border-bottom: 1px solid var(--cor-cinza-claro);
+}
+
+.tabela-cadastro tr:last-child td {
+    border-bottom: none;
 }
 
 .sem-registro {
-  text-align: center;
-  color: var(--cor-texto-secundario);
-  font-style: italic;
-}
-
-.tabela-cadastro {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  margin-top: 10px;
-}
-
-.tabela-cadastro th,
-.tabela-cadastro td {
-  border: 1px solid var(--cor-cinza-escuro);
-  padding: 8px;
-  color: var(--cor-texto-principal);
-}
-
-.tabela-cadastro th {
-  background-color: var(--cor-roxo);
-  color: var(--cor-texto-principal);
-}
-
-.button-group {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.button-group button {
-  padding: 4px 10px;
-  font-weight: bold;
-  border-radius: var(--border-radius-sm);
-  border: none;
-  cursor: pointer;
-  color: white;
-  transition: var(--transition-fast);
-}
-
-.button-group button.editar {
-  background-color: var(--cor-roxo);
-}
-
-.button-group button.editar:hover {
-  background-color: var(--cor-roxo-escuro);
-}
-
-.button-group button.deletar {
-  background-color: #dc3545;
-}
-
-.button-group button.deletar:hover {
-  background-color: #b02a37;
-}
-
-@media (max-width: 768px) {
-  .main-container,
-  .container {
-    width: 95%;
-    padding: 15px;
-  }
-
-  nav a {
-    display: block;
-    margin: 5px 0;
-  }
-
-  .form-cadastro input,
-  .form-cadastro select {
-    max-width: 100%;
-  }
-
-  .tabela-cadastro td .button-group {
-    flex-direction: column;
-    gap: 5px;
-  }
+    text-align: center;
+    color: var(--cor-texto-secundario);
+    padding: var(--espacamento-xl);
+    font-style: italic;
+    font-size: 1.05rem; /* AUMENTADO */
 }
