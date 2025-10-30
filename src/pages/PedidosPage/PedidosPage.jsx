@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../PedidosPage/PedidosPage.css"; 
+import "../PedidosPage/PedidosPage.css";
 
 const PedidoPage = () => {
   const [pedidos, setPedidos] = useState([]);
@@ -23,10 +23,34 @@ const PedidoPage = () => {
   const fetchPedidos = async () => {
     try {
       const mockPedidos = [
-        { id_pedido: "P001", cliente_id: "C101", data_pedido: "2024-10-25", valor_total: 55.5, status: "pronto" },
-        { id_pedido: "P002", cliente_id: "C102", data_pedido: "2024-10-25", valor_total: 120.0, status: "em_preparo" },
-        { id_pedido: "P003", cliente_id: "C103", data_pedido: "2024-10-24", valor_total: 89.9, status: "cancelado" },
-        { id_pedido: "P004", cliente_id: "C104", data_pedido: "2024-10-23", valor_total: 35.2, status: "em_preparo" },
+        {
+          id_pedido: "P001",
+          cliente_id: "C101",
+          data_pedido: "2024-10-25",
+          valor_total: 55.5,
+          status: "pronto",
+        },
+        {
+          id_pedido: "P002",
+          cliente_id: "C102",
+          data_pedido: "2024-10-25",
+          valor_total: 120.0,
+          status: "em_preparo",
+        },
+        {
+          id_pedido: "P003",
+          cliente_id: "C103",
+          data_pedido: "2024-10-24",
+          valor_total: 89.9,
+          status: "cancelado",
+        },
+        {
+          id_pedido: "P004",
+          cliente_id: "C104",
+          data_pedido: "2024-10-23",
+          valor_total: 35.2,
+          status: "em_preparo",
+        },
       ];
       setPedidos(mockPedidos);
     } catch (err) {
@@ -44,7 +68,30 @@ const PedidoPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const dataToSend = { ...formData };
+    const { id_pedido, cliente_id, data_pedido, valor_total, status } = {
+      ...formData,
+    };
+
+    if (!id_pedido || !cliente_id || !data_pedido || valor_total === "") {
+      setMensagem("Preencha todos os campos obrigatórios!");
+      setMensagemTipo("erro");
+      return;
+    }
+
+    if (parseFloat(valor_total) < 0) {
+      setMensagem("O valor total não pode ser negativo!");
+      setMensagemTipo("erro");
+      return;
+    }
+
+    const idDuplicado = pedidos.some(
+      (p) => p.id_pedido === id_pedido && p.id_pedido !== editandoId
+    );
+    if (idDuplicado) {
+      setMensagem("ID do pedido já cadastrado!");
+      setMensagemTipo("erro");
+      return;
+    }
 
     try {
       const method = editandoId ? "PUT" : "POST";
@@ -55,7 +102,11 @@ const PedidoPage = () => {
       const res = { ok: true };
 
       if (res.ok) {
-        setMensagem(editandoId ? "Pedido atualizado com sucesso!" : "Pedido cadastrado com sucesso!");
+        setMensagem(
+          editandoId
+            ? "Pedido atualizado com sucesso!"
+            : "Pedido cadastrado com sucesso!"
+        );
         setMensagemTipo("sucesso");
         handleCancelar();
         fetchPedidos();
@@ -94,7 +145,9 @@ const PedidoPage = () => {
   };
 
   const handleDeletar = async (id) => {
-    const isConfirmed = prompt(`Deseja realmente deletar o pedido ID ${id}? Digite 'SIM' para confirmar.`);
+    const isConfirmed = prompt(
+      `Deseja realmente deletar o pedido ID ${id}? Digite 'SIM' para confirmar.`
+    );
     if (isConfirmed !== "SIM") return;
 
     try {
@@ -118,7 +171,11 @@ const PedidoPage = () => {
     <div className="bg-gray-900 min-h-screen">
       <div className="container-principal">
         {mensagem && (
-          <p className={`mensagem ${mensagemTipo === "erro" ? "error" : "success"}`}>
+          <p
+            className={`mensagem ${
+              mensagemTipo === "erro" ? "error" : "success"
+            }`}
+          >
             {mensagem}
           </p>
         )}
@@ -127,7 +184,9 @@ const PedidoPage = () => {
           {/* FORMULÁRIO */}
           <div className="card-base card-form">
             <h2 className="card-header">
-              {editandoId ? `Atualizar Pedido (ID: ${editandoId})` : "Novo Pedido"}
+              {editandoId
+                ? `Atualizar Pedido (ID: ${editandoId})`
+                : "Novo Pedido"}
             </h2>
 
             <form className="form-cadastro" onSubmit={handleSubmit}>
@@ -194,13 +253,19 @@ const PedidoPage = () => {
               <div className="button-group">
                 <button
                   type="submit"
-                  className={`btn-base ${editandoId ? "btn-atualizar" : "btn-cadastrar"}`}
+                  className={`btn-base ${
+                    editandoId ? "btn-atualizar" : "btn-cadastrar"
+                  }`}
                 >
                   {editandoId ? "Atualizar" : "Cadastrar"}
                 </button>
 
                 {editandoId && (
-                  <button type="button" onClick={handleCancelar} className="btn-base btn-cancelar">
+                  <button
+                    type="button"
+                    onClick={handleCancelar}
+                    className="btn-base btn-cancelar"
+                  >
                     Cancelar
                   </button>
                 )}

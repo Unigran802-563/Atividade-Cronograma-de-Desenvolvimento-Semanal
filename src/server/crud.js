@@ -1,34 +1,90 @@
-import express from 'express';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import bodyParser from 'body-parser';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import cors from 'cors'; // ⚠️ Importante: Para integrar o front-end React com este back-end, é necessário que o CORS esteja habilitado.
+import express from "express";
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
+import bodyParser from "body-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+import cors from "cors"; // ⚠️ Importante: Para integrar o front-end React com este back-end, é necessário que o CORS esteja habilitado.
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const corsOptions = {
-  origin: '*', // Permite qualquer origem. Para mais segurança, use 'http://localhost:PORTA_DO_SEU_FRONTEND'
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Garante que DELETE e PUT sejam permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: "*", // Permite qualquer origem. Para mais segurança, use 'http://localhost:PORTA_DO_SEU_FRONTEND'
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // Garante que DELETE e PUT sejam permitidos
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.use(cors(corsOptions )); // Permite que o front-end acesse o back-end e caso precise o comando para baixar a dependência é: npm install cors
+app.use(cors(corsOptions)); // Permite que o front-end acesse o back-end e caso precise o comando para baixar a dependência é: npm install cors
 app.use(bodyParser.json());
 
-const dbPath = path.join(__dirname, '../database/database.db');
+const dbPath = path.join(__dirname, "../database/database.db");
 
 // Função para abrir conexão com o banco
 async function openDb() {
   return open({ filename: dbPath, driver: sqlite3.Database });
 }
+// -------------------- Função de Atualização Automática de Estoque (com transação) --------------------
+async function atualizarEstoquePorPedido(id_pedido) {
+  const db = await openDb();
+
+  try {
+    await db.run("BEGIN TRANSACTION");
+
+    const itens = await db.all(
+      `SELECT id_prato, quantidade FROM ItemPedido WHERE id_pedido = ?`,
+      [id_pedido]
+    );
+
+    for (const item of itens) {
+      const ingredientes = await db.all(
+        `SELECT id_ingrediente, quantidade_utilizada 
+         FROM Prato_Ingrediente WHERE id_prato = ?`,
+        [item.id_prato]
+      );
+
+      for (const ing of ingredientes) {
+        const quantidadeItem = parseFloat(item.quantidade);
+        const quantidadeIngrediente = parseFloat(ing.quantidade_utilizada);
+        const totalUsado = quantidadeIngrediente * quantidadeItem;
+
+        const estoque = await db.get(
+          `SELECT quantidade, limite_minimo FROM Estoque WHERE id_ingrediente = ?`,
+          [ing.id_ingrediente]
+        );
+
+        if (!estoque) continue;
+
+        const novaQuantidade = Math.max(0, parseFloat(estoque.quantidade) - totalUsado);
+
+        await db.run(
+          `UPDATE Estoque 
+           SET quantidade = ?, data_atualizacao = datetime('now')
+           WHERE id_ingrediente = ?`,
+          [novaQuantidade, ing.id_ingrediente]
+        );
+
+        if (novaQuantidade <= parseFloat(estoque.limite_minimo)) {
+          console.warn(
+            `⚠️ Estoque baixo para ingrediente ${ing.id_ingrediente}: ${novaQuantidade} unidades restantes.`
+          );
+        }
+      }
+    }
+
+    await db.run("COMMIT");
+  } catch (err) {
+    await db.run("ROLLBACK");
+    console.error("Erro ao atualizar estoque por pedido:", err.message);
+    throw err;
+  }
+}
+// -------------------- Função de Atualização Automática de Estoque (com transação) --------------------
 
 // -------------------- CRUD Endereco --------------------
 // Criação
-app.post('/endereco', async (req, res) => {
+app.post("/endereco", async (req, res) => {
   const { id_endereco, rua, numero, bairro, cidade, estado, cep } = req.body;
   try {
     const db = await openDb();
@@ -37,17 +93,19 @@ app.post('/endereco', async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [id_endereco, rua, numero, bairro, cidade, estado, cep]
     );
-    res.json({ message: 'Endereço criado!' });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+    res.json({ message: "Endereço criado!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 // Listagem
-app.get('/enderecos', async (req, res) => {
+app.get("/enderecos", async (req, res) => {
   const db = await openDb();
-  const enderecos = await db.all('SELECT * FROM Endereco');
+  const enderecos = await db.all("SELECT * FROM Endereco");
   res.json(enderecos);
 });
 // Atualização
-app.put('/endereco/:id', async (req, res) => {
+app.put("/endereco/:id", async (req, res) => {
   const { id } = req.params;
   const { rua, numero, bairro, cidade, estado, cep } = req.body;
   const db = await openDb();
@@ -55,19 +113,19 @@ app.put('/endereco/:id', async (req, res) => {
     `UPDATE Endereco SET rua=?, numero=?, bairro=?, cidade=?, estado=?, cep=? WHERE id_endereco=?`,
     [rua, numero, bairro, cidade, estado, cep, id]
   );
-  res.json({ message: 'Endereço atualizado!' });
+  res.json({ message: "Endereço atualizado!" });
 });
 // Exclusão
-app.delete('/endereco/:id', async (req, res) => {
+app.delete("/endereco/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Endereco WHERE id_endereco=?', [id]);
-  res.json({ message: 'Endereço deletado!' });
+  await db.run("DELETE FROM Endereco WHERE id_endereco=?", [id]);
+  res.json({ message: "Endereço deletado!" });
 });
 
 // -------------------- CRUD Cliente --------------------
 // Criação
-app.post('/cliente', async (req, res) => {
+app.post("/cliente", async (req, res) => {
   const { id_cliente, nome, telefone, cpf, id_endereco } = req.body;
   try {
     const db = await openDb();
@@ -75,24 +133,28 @@ app.post('/cliente', async (req, res) => {
       `INSERT INTO Cliente (id_cliente, nome, telefone, cpf, id_endereco) VALUES (?, ?, ?, ?, ?)`,
       [id_cliente, nome, telefone, cpf, id_endereco]
     );
-    res.json({ message: 'Cliente criado!' });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+    res.json({ message: "Cliente criado!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 // Listagem
-app.get('/clientes', async (req, res) => {
+app.get("/clientes", async (req, res) => {
   const db = await openDb();
-  const clientes = await db.all('SELECT * FROM Cliente');
+  const clientes = await db.all("SELECT * FROM Cliente");
   res.json(clientes);
 });
 // Atualização
-app.get('/cliente/:id', async (req, res) => {
+app.get("/cliente/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  const cliente = await db.get('SELECT * FROM Cliente WHERE id_cliente=?', [id]);
+  const cliente = await db.get("SELECT * FROM Cliente WHERE id_cliente=?", [
+    id,
+  ]);
   res.json(cliente);
 });
 // Exclusão
-app.put('/cliente/:id', async (req, res) => {
+app.put("/cliente/:id", async (req, res) => {
   const { id } = req.params;
   const { nome, telefone, cpf, id_endereco } = req.body;
   const db = await openDb();
@@ -100,35 +162,35 @@ app.put('/cliente/:id', async (req, res) => {
     `UPDATE Cliente SET nome=?, telefone=?, cpf=?, id_endereco=? WHERE id_cliente=?`,
     [nome, telefone, cpf, id_endereco, id]
   );
-  res.json({ message: 'Cliente atualizado!' });
+  res.json({ message: "Cliente atualizado!" });
 });
 
-app.delete('/cliente/:id', async (req, res) => {
+app.delete("/cliente/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Cliente WHERE id_cliente=?', [id]);
-  res.json({ message: 'Cliente deletado!' });
+  await db.run("DELETE FROM Cliente WHERE id_cliente=?", [id]);
+  res.json({ message: "Cliente deletado!" });
 });
 
 // -------------------- CRUD Ingrediente --------------------
 // Criação
-app.post('/ingrediente', async (req, res) => {
+app.post("/ingrediente", async (req, res) => {
   const { id_ingrediente, nome, unidade_medida } = req.body;
   const db = await openDb();
   await db.run(
     `INSERT INTO Ingrediente (id_ingrediente, nome, unidade_medida) VALUES (?, ?, ?)`,
     [id_ingrediente, nome, unidade_medida]
   );
-  res.json({ message: 'Ingrediente criado!' });
+  res.json({ message: "Ingrediente criado!" });
 });
 // Listagem
-app.get('/ingredientes', async (req, res) => {
+app.get("/ingredientes", async (req, res) => {
   const db = await openDb();
-  const ingredientes = await db.all('SELECT * FROM Ingrediente');
+  const ingredientes = await db.all("SELECT * FROM Ingrediente");
   res.json(ingredientes);
 });
 // Atualização
-app.put('/ingrediente/:id', async (req, res) => {
+app.put("/ingrediente/:id", async (req, res) => {
   const { id } = req.params;
   const { nome, unidade_medida } = req.body;
   const db = await openDb();
@@ -136,35 +198,41 @@ app.put('/ingrediente/:id', async (req, res) => {
     `UPDATE Ingrediente SET nome=?, unidade_medida=? WHERE id_ingrediente=?`,
     [nome, unidade_medida, id]
   );
-  res.json({ message: 'Ingrediente atualizado!' });
+  res.json({ message: "Ingrediente atualizado!" });
 });
 // Exclusão
-app.delete('/ingrediente/:id', async (req, res) => {
+app.delete("/ingrediente/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Ingrediente WHERE id_ingrediente=?', [id]);
-  res.json({ message: 'Ingrediente deletado!' });
+  await db.run("DELETE FROM Ingrediente WHERE id_ingrediente=?", [id]);
+  res.json({ message: "Ingrediente deletado!" });
 });
 
 // -------------------- CRUD Estoque --------------------
 // Criação
-app.post('/estoque', async (req, res) => {
-  const { id_estoque, id_ingrediente, quantidade, limite_minimo, data_atualizacao } = req.body;
+app.post("/estoque", async (req, res) => {
+  const {
+    id_estoque,
+    id_ingrediente,
+    quantidade,
+    limite_minimo,
+    data_atualizacao,
+  } = req.body;
   const db = await openDb();
   await db.run(
     `INSERT INTO Estoque (id_estoque, id_ingrediente, quantidade, limite_minimo, data_atualizacao) VALUES (?, ?, ?, ?, ?)`,
     [id_estoque, id_ingrediente, quantidade, limite_minimo, data_atualizacao]
   );
-  res.json({ message: 'Estoque criado!' });
+  res.json({ message: "Estoque criado!" });
 });
 // Listagem
-app.get('/estoques', async (req, res) => {
+app.get("/estoques", async (req, res) => {
   const db = await openDb();
-  const estoques = await db.all('SELECT * FROM Estoque');
+  const estoques = await db.all("SELECT * FROM Estoque");
   res.json(estoques);
 });
 // Atualização
-app.put('/estoque/:id', async (req, res) => {
+app.put("/estoque/:id", async (req, res) => {
   const { id } = req.params;
   const { quantidade, limite_minimo, data_atualizacao } = req.body;
   const db = await openDb();
@@ -172,141 +240,142 @@ app.put('/estoque/:id', async (req, res) => {
     `UPDATE Estoque SET quantidade=?, limite_minimo=?, data_atualizacao=? WHERE id_estoque=?`,
     [quantidade, limite_minimo, data_atualizacao, id]
   );
-  res.json({ message: 'Estoque atualizado!' });
+  res.json({ message: "Estoque atualizado!" });
 });
 // Exclusão
-app.delete('/estoque/:id', async (req, res) => {
+app.delete("/estoque/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Estoque WHERE id_estoque=?', [id]);
-  res.json({ message: 'Estoque deletado!' });
+  await db.run("DELETE FROM Estoque WHERE id_estoque=?", [id]);
+  res.json({ message: "Estoque deletado!" });
 });
 
-app.post('/pratos', async (req, res) => {
-  const { nome, descricao, preco, categoria, disponivel } = req.body;
-  
+// -------------------- CRUD Prato --------------------
+app.post("/pratos", async (req, res) => {
+  const { id_prato, nome, descricao, preco, categoria, disponivel } = req.body;
+
   try {
     const db = await openDb();
-    
+
     // Inserir prato (id_prato será auto-incrementado)
     const result = await db.run(
-      `INSERT INTO Prato (nome, descricao, preco_centavos, categoria) 
-       VALUES (?, ?, ?, ?)`,
-      [nome, descricao, preco, categoria]
+      `INSERT INTO Prato (id_prato, nome, descricao, preco_centavos, categoria) 
+       VALUES (?, ?, ?, ?, ?)`,
+      [id_prato, nome, descricao, preco, categoria]
     );
-    
-    res.json({ 
-      message: 'Prato criado com sucesso!', 
-      id: result.lastID 
+
+    res.json({
+      message: "Prato criado com sucesso!",
+      id_prato
     });
   } catch (err) {
-    console.error('Erro ao criar prato:', err);
+    console.error("Erro ao criar prato:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 // Listagem de Pratos
-app.get('/pratos', async (req, res) => {
+app.get("/pratos", async (req, res) => {
   try {
     const db = await openDb();
-    const pratos = await db.all('SELECT * FROM Prato');
-    
+    const pratos = await db.all("SELECT * FROM Prato");
+
     // Adicionar campo 'disponivel' como true por padrão
-    const pratosComDisponivel = pratos.map(prato => ({
+    const pratosComDisponivel = pratos.map((prato) => ({
       ...prato,
       id: prato.id_prato,
       preco: prato.preco_centavos,
-      disponivel: true // Pode ajustar conforme sua lógica
+      disponivel: true, // Pode ajustar conforme sua lógica
     }));
-    
+
     res.json(pratosComDisponivel);
   } catch (err) {
-    console.error('Erro ao listar pratos:', err);
+    console.error("Erro ao listar pratos:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 // Buscar Prato por ID
-app.get('/pratos/:id', async (req, res) => {
+app.get("/pratos/:id", async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     const db = await openDb();
-    const prato = await db.get('SELECT * FROM Prato WHERE id_prato=?', [id]);
-    
+    const prato = await db.get("SELECT * FROM Prato WHERE id_prato=?", [id]);
+
     if (!prato) {
-      return res.status(404).json({ error: 'Prato não encontrado' });
+      return res.status(404).json({ error: "Prato não encontrado" });
     }
-    
+
     res.json({
       ...prato,
       id: prato.id_prato,
       preco: prato.preco_centavos,
-      disponivel: true
+      disponivel: true,
     });
   } catch (err) {
-    console.error('Erro ao buscar prato:', err);
+    console.error("Erro ao buscar prato:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 // Atualização de Prato
-app.put('/pratos/:id', async (req, res) => {
+app.put("/pratos/:id", async (req, res) => {
   const { id } = req.params;
   const { nome, descricao, preco, categoria, disponivel } = req.body;
-  
+
   try {
     const db = await openDb();
-    
+
     await db.run(
       `UPDATE Prato 
        SET nome=?, descricao=?, preco_centavos=?, categoria=? 
        WHERE id_prato=?`,
       [nome, descricao, preco, categoria, id]
     );
-    
-    res.json({ message: 'Prato atualizado com sucesso!' });
+
+    res.json({ message: "Prato atualizado com sucesso!" });
   } catch (err) {
-    console.error('Erro ao atualizar prato:', err);
+    console.error("Erro ao atualizar prato:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 // Exclusão de Prato
-app.delete('/pratos/:id', async (req, res) => {
+app.delete("/pratos/:id", async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     const db = await openDb();
-    
-    await db.run('DELETE FROM Prato WHERE id_prato=?', [id]);
-    
-    res.json({ message: 'Prato deletado com sucesso!' });
+
+    await db.run("DELETE FROM Prato WHERE id_prato=?", [id]);
+
+    res.json({ message: "Prato deletado com sucesso!" });
   } catch (err) {
-    console.error('Erro ao deletar prato:', err);
+    console.error("Erro ao deletar prato:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 // -------------------- CRUD Prato_Ingrediente --------------------
 // Criação
-app.post('/prato_ingrediente', async (req, res) => {
+app.post("/prato_ingrediente", async (req, res) => {
   const { id_prato, id_ingrediente, quantidade_utilizada } = req.body;
   const db = await openDb();
   await db.run(
     `INSERT INTO Prato_Ingrediente (id_prato, id_ingrediente, quantidade_utilizada) VALUES (?, ?, ?)`,
     [id_prato, id_ingrediente, quantidade_utilizada]
   );
-  res.json({ message: 'Prato_Ingrediente criado!' });
+  res.json({ message: "Prato_Ingrediente criado!" });
 });
 // Listagem
-app.get('/pratos_ingredientes', async (req, res) => {
+app.get("/pratos_ingredientes", async (req, res) => {
   const db = await openDb();
-  const pi = await db.all('SELECT * FROM Prato_Ingrediente');
+  const pi = await db.all("SELECT * FROM Prato_Ingrediente");
   res.json(pi);
 });
 // Atualização
-app.put('/prato_ingrediente/:prato/:ingrediente', async (req, res) => {
+app.put("/prato_ingrediente/:prato/:ingrediente", async (req, res) => {
   const { prato, ingrediente } = req.params;
   const { quantidade_utilizada } = req.body;
   const db = await openDb();
@@ -314,76 +383,97 @@ app.put('/prato_ingrediente/:prato/:ingrediente', async (req, res) => {
     `UPDATE Prato_Ingrediente SET quantidade_utilizada=? WHERE id_prato=? AND id_ingrediente=?`,
     [quantidade_utilizada, prato, ingrediente]
   );
-  res.json({ message: 'Prato_Ingrediente atualizado!' });
+  res.json({ message: "Prato_Ingrediente atualizado!" });
 });
 // Exclusão
-app.delete('/prato_ingrediente/:prato/:ingrediente', async (req, res) => {
+app.delete("/prato_ingrediente/:prato/:ingrediente", async (req, res) => {
   const { prato, ingrediente } = req.params;
   const db = await openDb();
   await db.run(
-    'DELETE FROM Prato_Ingrediente WHERE id_prato=? AND id_ingrediente=?',
+    "DELETE FROM Prato_Ingrediente WHERE id_prato=? AND id_ingrediente=?",
     [prato, ingrediente]
   );
-  res.json({ message: 'Prato_Ingrediente deletado!' });
+  res.json({ message: "Prato_Ingrediente deletado!" });
 });
 
 // -------------------- CRUD Pedido --------------------
 // Criação
-app.post('/pedido', async (req, res) => {
-  const { id_pedido, id_cliente, data_pedido, status, total_centavos } = req.body;
+app.post("/pedido", async (req, res) => {
+  const { id_pedido, id_cliente, data_pedido, status, total_centavos } =
+    req.body;
   const db = await openDb();
-  await db.run(
-    `INSERT INTO Pedido (id_pedido, id_cliente, data_pedido, status, total_centavos)
+  try {
+    await db.run(
+      `INSERT INTO Pedido (id_pedido, id_cliente, data_pedido, status, total_centavos)
      VALUES (?, ?, ?, ?, ?)`,
-    [id_pedido, id_cliente, data_pedido, status, total_centavos]
-  );
-  res.json({ message: 'Pedido criado!' });
+      [id_pedido, id_cliente, data_pedido, status, total_centavos]
+    );
+
+    // Se o pedido já estiver "em_preparo", atualiza o estoque
+    if (status === "em_preparo") {
+      await atualizarEstoquePorPedido(id_pedido);
+    }
+
+    res.json({ message: "Pedido criado!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 // Listagem
-app.get('/pedidos', async (req, res) => {
+app.get("/pedidos", async (req, res) => {
   const db = await openDb();
-  const pedidos = await db.all('SELECT * FROM Pedido');
+  const pedidos = await db.all("SELECT * FROM Pedido");
   res.json(pedidos);
 });
 // Atualização
-app.put('/pedido/:id', async (req, res) => {
+app.put("/pedido/:id", async (req, res) => {
   const { id } = req.params;
   const { status, total_centavos } = req.body;
   const db = await openDb();
-  await db.run(
-    `UPDATE Pedido SET status=?, total_centavos=? WHERE id_pedido=?`,
-    [status, total_centavos, id]
-  );
-  res.json({ message: 'Pedido atualizado!' });
+  try {
+    await db.run(
+      `UPDATE Pedido SET status=?, total_centavos=? WHERE id_pedido=?`,
+      [status, total_centavos, id]
+    );
+    // Se o status for alterado para "em_preparo", atualiza o estoque
+    if (status === "em_preparo") {
+      await atualizarEstoquePorPedido(id);
+    }
+
+    res.json({ message: "Pedido atualizado!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 // Exclusão
-app.delete('/pedido/:id', async (req, res) => {
+app.delete("/pedido/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Pedido WHERE id_pedido=?', [id]);
-  res.json({ message: 'Pedido deletado!' });
+  await db.run("DELETE FROM Pedido WHERE id_pedido=?", [id]);
+  res.json({ message: "Pedido deletado!" });
 });
 
 // -------------------- CRUD ItemPedido --------------------
 // Criação
-app.post('/itempedido', async (req, res) => {
-  const { id_item, id_pedido, id_prato, quantidade, subtotal_centavos } = req.body;
+app.post("/itempedido", async (req, res) => {
+  const { id_item, id_pedido, id_prato, quantidade, subtotal_centavos } =
+    req.body;
   const db = await openDb();
   await db.run(
     `INSERT INTO ItemPedido (id_item, id_pedido, id_prato, quantidade, subtotal_centavos)
      VALUES (?, ?, ?, ?, ?)`,
     [id_item, id_pedido, id_prato, quantidade, subtotal_centavos]
   );
-  res.json({ message: 'ItemPedido criado!' });
+  res.json({ message: "ItemPedido criado!" });
 });
 // Listagem
-app.get('/itempedidos', async (req, res) => {
+app.get("/itempedidos", async (req, res) => {
   const db = await openDb();
-  const items = await db.all('SELECT * FROM ItemPedido');
+  const items = await db.all("SELECT * FROM ItemPedido");
   res.json(items);
 });
 // Atualização
-app.put('/itempedido/:id', async (req, res) => {
+app.put("/itempedido/:id", async (req, res) => {
   const { id } = req.params;
   const { quantidade, subtotal_centavos } = req.body;
   const db = await openDb();
@@ -391,36 +481,37 @@ app.put('/itempedido/:id', async (req, res) => {
     `UPDATE ItemPedido SET quantidade=?, subtotal_centavos=? WHERE id_item=?`,
     [quantidade, subtotal_centavos, id]
   );
-  res.json({ message: 'ItemPedido atualizado!' });
+  res.json({ message: "ItemPedido atualizado!" });
 });
 // Exclusão
-app.delete('/itempedido/:id', async (req, res) => {
+app.delete("/itempedido/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM ItemPedido WHERE id_item=?', [id]);
-  res.json({ message: 'ItemPedido deletado!' });
+  await db.run("DELETE FROM ItemPedido WHERE id_item=?", [id]);
+  res.json({ message: "ItemPedido deletado!" });
 });
 
 // -------------------- CRUD Pagamento --------------------
 // Criação
-app.post('/pagamento', async (req, res) => {
-  const { id_pagamento, id_pedido, metodo_pagamento, valor_centavos, status } = req.body;
+app.post("/pagamento", async (req, res) => {
+  const { id_pagamento, id_pedido, metodo_pagamento, valor_centavos, status } =
+    req.body;
   const db = await openDb();
   await db.run(
     `INSERT INTO Pagamento (id_pagamento, id_pedido, metodo_pagamento, valor_centavos, status)
      VALUES (?, ?, ?, ?, ?)`,
     [id_pagamento, id_pedido, metodo_pagamento, valor_centavos, status]
   );
-  res.json({ message: 'Pagamento criado!' });
+  res.json({ message: "Pagamento criado!" });
 });
 // Listagem
-app.get('/pagamentos', async (req, res) => {
+app.get("/pagamentos", async (req, res) => {
   const db = await openDb();
-  const pagamentos = await db.all('SELECT * FROM Pagamento');
+  const pagamentos = await db.all("SELECT * FROM Pagamento");
   res.json(pagamentos);
 });
 // Atualização
-app.put('/pagamento/:id', async (req, res) => {
+app.put("/pagamento/:id", async (req, res) => {
   const { id } = req.params;
   const { status, valor_centavos } = req.body;
   const db = await openDb();
@@ -428,19 +519,19 @@ app.put('/pagamento/:id', async (req, res) => {
     `UPDATE Pagamento SET status=?, valor_centavos=? WHERE id_pagamento=?`,
     [status, valor_centavos, id]
   );
-  res.json({ message: 'Pagamento atualizado!' });
+  res.json({ message: "Pagamento atualizado!" });
 });
 // Exclusão
-app.delete('/pagamento/:id', async (req, res) => {
+app.delete("/pagamento/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Pagamento WHERE id_pagamento=?', [id]);
-  res.json({ message: 'Pagamento deletado!' });
+  await db.run("DELETE FROM Pagamento WHERE id_pagamento=?", [id]);
+  res.json({ message: "Pagamento deletado!" });
 });
 
 // -------------------- Pagamento Cartao --------------------
 // Criação
-app.post('/pagamento_cartao', async (req, res) => {
+app.post("/pagamento_cartao", async (req, res) => {
   const { id_pagamento, bandeira, ultimos4, parcelas, autorizacao } = req.body;
   const db = await openDb();
   await db.run(
@@ -448,16 +539,16 @@ app.post('/pagamento_cartao', async (req, res) => {
      VALUES (?, ?, ?, ?, ?)`,
     [id_pagamento, bandeira, ultimos4, parcelas, autorizacao]
   );
-  res.json({ message: 'Pagamento cartão criado!' });
+  res.json({ message: "Pagamento cartão criado!" });
 });
 // Listagem
-app.get('/pagamentos_cartao', async (req, res) => {
+app.get("/pagamentos_cartao", async (req, res) => {
   const db = await openDb();
-  const data = await db.all('SELECT * FROM Pagamento_Cartao');
+  const data = await db.all("SELECT * FROM Pagamento_Cartao");
   res.json(data);
 });
 // Atualização
-app.put('/pagamento_cartao/:id', async (req, res) => {
+app.put("/pagamento_cartao/:id", async (req, res) => {
   const { id } = req.params;
   const { bandeira, ultimos4, parcelas, autorizacao } = req.body;
   const db = await openDb();
@@ -465,19 +556,19 @@ app.put('/pagamento_cartao/:id', async (req, res) => {
     `UPDATE Pagamento_Cartao SET bandeira=?, ultimos4=?, parcelas=?, autorizacao=? WHERE id_pagamento=?`,
     [bandeira, ultimos4, parcelas, autorizacao, id]
   );
-  res.json({ message: 'Pagamento cartão atualizado!' });
+  res.json({ message: "Pagamento cartão atualizado!" });
 });
 // Exclusão
-app.delete('/pagamento_cartao/:id', async (req, res) => {
+app.delete("/pagamento_cartao/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Pagamento_Cartao WHERE id_pagamento=?', [id]);
-  res.json({ message: 'Pagamento cartão deletado!' });
+  await db.run("DELETE FROM Pagamento_Cartao WHERE id_pagamento=?", [id]);
+  res.json({ message: "Pagamento cartão deletado!" });
 });
 
 // -------------------- Pagamento PIX --------------------
 // Criação
-app.post('/pagamento_pix', async (req, res) => {
+app.post("/pagamento_pix", async (req, res) => {
   const { id_pagamento, chave_pix, txid } = req.body;
   const db = await openDb();
   await db.run(
@@ -485,16 +576,16 @@ app.post('/pagamento_pix', async (req, res) => {
      VALUES (?, ?, ?)`,
     [id_pagamento, chave_pix, txid]
   );
-  res.json({ message: 'Pagamento PIX criado!' });
+  res.json({ message: "Pagamento PIX criado!" });
 });
 // Listagem
-app.get('/pagamentos_pix', async (req, res) => {
+app.get("/pagamentos_pix", async (req, res) => {
   const db = await openDb();
-  const data = await db.all('SELECT * FROM Pagamento_PIX');
+  const data = await db.all("SELECT * FROM Pagamento_PIX");
   res.json(data);
 });
 // Atualização
-app.put('/pagamento_pix/:id', async (req, res) => {
+app.put("/pagamento_pix/:id", async (req, res) => {
   const { id } = req.params;
   const { chave_pix, txid } = req.body;
   const db = await openDb();
@@ -502,19 +593,19 @@ app.put('/pagamento_pix/:id', async (req, res) => {
     `UPDATE Pagamento_PIX SET chave_pix=?, txid=? WHERE id_pagamento=?`,
     [chave_pix, txid, id]
   );
-  res.json({ message: 'Pagamento PIX atualizado!' });
+  res.json({ message: "Pagamento PIX atualizado!" });
 });
 // Exclusão
-app.delete('/pagamento_pix/:id', async (req, res) => {
+app.delete("/pagamento_pix/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Pagamento_PIX WHERE id_pagamento=?', [id]);
-  res.json({ message: 'Pagamento PIX deletado!' });
+  await db.run("DELETE FROM Pagamento_PIX WHERE id_pagamento=?", [id]);
+  res.json({ message: "Pagamento PIX deletado!" });
 });
 
 // -------------------- Pagamento Dinheiro --------------------
 // Criação
-app.post('/pagamento_dinheiro', async (req, res) => {
+app.post("/pagamento_dinheiro", async (req, res) => {
   const { id_pagamento, troco } = req.body;
   const db = await openDb();
   await db.run(
@@ -522,31 +613,31 @@ app.post('/pagamento_dinheiro', async (req, res) => {
      VALUES (?, ?)`,
     [id_pagamento, troco]
   );
-  res.json({ message: 'Pagamento Dinheiro criado!' });
+  res.json({ message: "Pagamento Dinheiro criado!" });
 });
 // Listagem
-app.get('/pagamentos_dinheiro', async (req, res) => {
+app.get("/pagamentos_dinheiro", async (req, res) => {
   const db = await openDb();
-  const data = await db.all('SELECT * FROM Pagamento_Dinheiro');
+  const data = await db.all("SELECT * FROM Pagamento_Dinheiro");
   res.json(data);
 });
 // Atualização
-app.put('/pagamento_dinheiro/:id', async (req, res) => {
+app.put("/pagamento_dinheiro/:id", async (req, res) => {
   const { id } = req.params;
   const { troco } = req.body;
   const db = await openDb();
-  await db.run(
-    `UPDATE Pagamento_Dinheiro SET troco=? WHERE id_pagamento=?`,
-    [troco, id]
-  );
-  res.json({ message: 'Pagamento Dinheiro atualizado!' });
+  await db.run(`UPDATE Pagamento_Dinheiro SET troco=? WHERE id_pagamento=?`, [
+    troco,
+    id,
+  ]);
+  res.json({ message: "Pagamento Dinheiro atualizado!" });
 });
 // Exclusão
-app.delete('/pagamento_dinheiro/:id', async (req, res) => {
+app.delete("/pagamento_dinheiro/:id", async (req, res) => {
   const { id } = req.params;
   const db = await openDb();
-  await db.run('DELETE FROM Pagamento_Dinheiro WHERE id_pagamento=?', [id]);
-  res.json({ message: 'Pagamento Dinheiro deletado!' });
+  await db.run("DELETE FROM Pagamento_Dinheiro WHERE id_pagamento=?", [id]);
+  res.json({ message: "Pagamento Dinheiro deletado!" });
 });
 
 // -------------------- Servidor --------------------

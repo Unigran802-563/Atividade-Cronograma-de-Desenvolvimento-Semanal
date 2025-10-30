@@ -6,6 +6,7 @@ import "./PratoPage.css";
 function PratoPage() {
   const [pratos, setPratos] = useState([]);
   const [formData, setFormData] = useState({
+    id_prato: "",
     nome: "",
     descricao: "",
     preco: "",
@@ -40,7 +41,28 @@ function PratoPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (
+      !formData.id_prato ||
+      !formData.nome ||
+      !formData.categoria ||
+      formData.preco === ""
+    ) {
+      alert("Preencha todos os campos obrigatórios!");
+      return;
+    }
+
+    if (parseFloat(formData.preco) < 0) {
+      alert("O preço não pode ser negativo!");
+      return;
+    }
+
+    if (!editando && pratos.some((p) => p.id_prato === formData.id_prato)) {
+      alert("ID do prato já cadastrado!");
+      return;
+    }
+
     const pratoData = {
+      id_prato: formData.id_prato,
       ...formData,
       preco: Math.round(parseFloat(formData.preco) * 100),
     };
@@ -69,6 +91,7 @@ function PratoPage() {
 
   const handleEditar = (prato) => {
     setFormData({
+      id_prato: prato.id_prato,
       nome: prato.nome,
       descricao: prato.descricao,
       preco: (prato.preco / 100).toFixed(2),
@@ -76,7 +99,7 @@ function PratoPage() {
       disponivel: prato.disponivel,
     });
     setEditando(true);
-    setPratoEditId(prato.id);
+    setPratoEditId(prato.id_prato);
   };
 
   const handleDeletar = async (id) => {
@@ -115,6 +138,20 @@ function PratoPage() {
         <div className="prato-form-card">
           <h2>{editando ? "Editar Prato" : "Cadastrar Novo Prato"}</h2>
           <form onSubmit={handleSubmit} className="prato-form">
+            <div className="form-group">
+              <label htmlFor="id_prato">ID do Prato *</label>
+              <input
+                type="text"
+                id="id_prato"
+                name="id_prato"
+                value={formData.id_prato}
+                onChange={handleChange}
+                placeholder="Ex: PR001"
+                required
+                disabled={editando} // impede mudar ID durante edição
+              />
+            </div>
+
             <div className="form-group">
               <label htmlFor="nome">Nome do Prato *</label>
               <input
@@ -217,7 +254,7 @@ function PratoPage() {
               <p className="lista-vazia">Nenhum prato cadastrado ainda.</p>
             ) : (
               pratos.map((prato) => (
-                <div key={prato.id} className="prato-item">
+                <div key={prato.id_prato} className="prato-item">
                   <div className="prato-info">
                     <h3>{prato.nome}</h3>
                     <p className="prato-descricao">{prato.descricao}</p>
@@ -253,7 +290,7 @@ function PratoPage() {
                     </button>
                     <button
                       className="btn-deletar"
-                      onClick={() => handleDeletar(prato.id)}
+                      onClick={() => handleDeletar(prato.id_prato)}
                       title="Deletar"
                     >
                       <FaTrash color="#EF4444" />

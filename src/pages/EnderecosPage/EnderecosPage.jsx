@@ -50,7 +50,10 @@ const EnderecosPage = () => {
 
     if (name === "estado") {
       // Permite apenas letras e limita a 2 caracteres em maiúsculo
-      const estadoFormatado = value.replace(/[^a-zA-Z]/g, "").toUpperCase().slice(0, 2);
+      const estadoFormatado = value
+        .replace(/[^a-zA-Z]/g, "")
+        .toUpperCase()
+        .slice(0, 2);
       setFormData({ ...formData, estado: estadoFormatado });
       return;
     }
@@ -90,6 +93,17 @@ const EnderecosPage = () => {
     // Validação de UF
     if (formData.estado.length !== 2) {
       setMensagem("O campo Estado (UF) deve ter exatamente 2 letras.");
+      setMensagemTipo("erro");
+      return;
+    }
+
+    const idDuplicado = enderecos.some(
+      (e) =>
+        e.id_endereco === formData.id_endereco && e.id_endereco !== editandoId
+    );
+
+    if (idDuplicado) {
+      setMensagem("ID de endereço já cadastrado!");
       setMensagemTipo("erro");
       return;
     }
@@ -154,9 +168,11 @@ const EnderecosPage = () => {
   // Simulação de modal de confirmação, pois window.confirm() não é permitido
   const handleDeletar = async (id) => {
     // Usando prompt simples para confirmação
-    const isConfirmed = prompt(`Deseja realmente deletar o endereço ID ${id}? Digite 'SIM' para confirmar.`);
-    if (isConfirmed !== 'SIM') return;
-    
+    const isConfirmed = prompt(
+      `Deseja realmente deletar o endereço ID ${id}? Digite 'SIM' para confirmar.`
+    );
+    if (isConfirmed !== "SIM") return;
+
     try {
       const res = await fetch(`${API_URL}/endereco/${id}`, {
         method: "DELETE",
@@ -183,14 +199,12 @@ const EnderecosPage = () => {
           {mensagem}
         </p>
       )}
-
       {/* CONTAINER GRID - APLICA O LAYOUT DE 2 COLUNAS */}
-      <div className="enderecos-container"> 
-
+      <div className="enderecos-container">
         {/* 1. BLOCO DO FORMULÁRIO (CARD) - Esquerda */}
         <div className="endereco-form-card">
-          <h2>Cadastro de Endereço</h2> 
-          
+          <h2>Cadastro de Endereço</h2>
+
           <form onSubmit={handleSubmit} className="form-cadastro">
             <label>ID Endereço</label>
             <input
@@ -266,22 +280,27 @@ const EnderecosPage = () => {
                 {editandoId ? "Atualizar" : "Cadastrar"}
               </button>
               {editandoId && (
-                <button type="button" onClick={handleCancelar} className="cancelar">
+                <button
+                  type="button"
+                  onClick={handleCancelar}
+                  className="cancelar"
+                >
                   Cancelar
                 </button>
               )}
             </div>
           </form>
-        </div> {/* FIM DO ENDERECO-FORM-CARD */}
-
-
+        </div>{" "}
+        {/* FIM DO ENDERECO-FORM-CARD */}
         {/* 2. BLOCO DA LISTA (CARD) - Direita */}
         <div className="endereco-lista-card">
           <h3>Lista de Endereços</h3>
           {enderecos.length === 0 ? (
             <p className="sem-registro">Nenhum endereço cadastrado ainda.</p>
           ) : (
-            <div style={{overflowX: 'auto'}}> {/* Permite rolagem horizontal da tabela em telas pequenas */}
+            <div style={{ overflowX: "auto" }}>
+              {" "}
+              {/* Permite rolagem horizontal da tabela em telas pequenas */}
               <table className="tabela-cadastro">
                 <thead>
                   <tr>
@@ -307,7 +326,10 @@ const EnderecosPage = () => {
                       <td>{e.cep}</td>
                       <td>
                         <div className="button-group">
-                          <button className="editar" onClick={() => handleEditar(e)}>
+                          <button
+                            className="editar"
+                            onClick={() => handleEditar(e)}
+                          >
                             Editar
                           </button>
                           <button
@@ -324,9 +346,10 @@ const EnderecosPage = () => {
               </table>
             </div>
           )}
-        </div> {/* FIM DO ENDERECO-LISTA-CARD */}
-
-      </div> {/* FIM DO ENDERECOS-CONTAINER */}
+        </div>{" "}
+        {/* FIM DO ENDERECO-LISTA-CARD */}
+      </div>{" "}
+      {/* FIM DO ENDERECOS-CONTAINER */}
     </div>
   );
 };

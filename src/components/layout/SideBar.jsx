@@ -7,6 +7,9 @@ import {
   FaUsers,
   FaClipboardList,
   FaLocationArrow,
+  FaBoxes,
+  FaListAlt,
+  FaReceipt,
 } from "react-icons/fa";
 import "./Sidebar.css";
 
@@ -46,6 +49,18 @@ function Sidebar() {
         </NavLink>
 
         <NavLink
+          to="/prato-ingredientes"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <span className="nav-icon">
+            <FaListAlt />
+          </span>
+          <span className="nav-text">Prato Ingredientes</span>
+        </NavLink>
+
+        <NavLink
           to="/ingredientes"
           className={({ isActive }) =>
             isActive ? "nav-item active" : "nav-item"
@@ -76,9 +91,21 @@ function Sidebar() {
           }
         >
           <span className="nav-icon">
-            <FaLocationArrow/>
+            <FaLocationArrow />
           </span>
           <span className="nav-text">Endereços</span>
+        </NavLink>
+
+        <NavLink
+          to="/estoques"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <span className="nav-icon">
+            <FaBoxes />
+          </span>
+          <span className="nav-text">Estoque</span>
         </NavLink>
 
         <NavLink
@@ -92,8 +119,14 @@ function Sidebar() {
           </span>
           <span className="nav-text">Pedidos</span>
         </NavLink>
-      </nav>
 
+        <NavLink to="/itens-pedido" className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}>
+          <span className="nav-icon"><FaReceipt /></span>
+          <span className="nav-text">Itens do Pedido</span>
+        </NavLink>
+
+      </nav>
+      
       <div className="sidebar-footer">
         <p>© 2025 SOS Restaurante</p>
       </div>
