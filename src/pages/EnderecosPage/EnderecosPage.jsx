@@ -13,10 +13,9 @@ const EnderecosPage = () => {
     cep: "",
   });
   const [mensagem, setMensagem] = useState("");
-  const [mensagemTipo, setMensagemTipo] = useState(""); // 'sucesso' ou 'erro'
+  const [mensagemTipo, setMensagemTipo] = useState("");
   const [editandoId, setEditandoId] = useState(null);
 
-  // NOTA: Para rodar, esta API deve estar ativa em http://localhost:3001
   const API_URL = "http://localhost:3001";
 
   useEffect(() => {
@@ -29,7 +28,6 @@ const EnderecosPage = () => {
       const data = await res.json();
       setEnderecos(data);
     } catch (err) {
-      // Usando console.error em vez de setMensagem para evitar conflito com a interface de usuário
       console.error(`Erro ao buscar endereços: ${err.message}`);
     }
   };
@@ -37,9 +35,7 @@ const EnderecosPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Máscaras e restrições específicas
     if (name === "cep") {
-      // Mantém apenas números e formata como 99999-999
       const cepFormatado = value
         .replace(/\D/g, "")
         .replace(/^(\d{5})(\d)/, "$1-$2")
@@ -49,7 +45,6 @@ const EnderecosPage = () => {
     }
 
     if (name === "estado") {
-      // Permite apenas letras e limita a 2 caracteres em maiúsculo
       const estadoFormatado = value
         .replace(/[^a-zA-Z]/g, "")
         .toUpperCase()
@@ -64,7 +59,6 @@ const EnderecosPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validação de campos obrigatórios
     const camposObrigatorios = [
       "id_endereco",
       "rua",
@@ -83,14 +77,12 @@ const EnderecosPage = () => {
       }
     }
 
-    // Validação de formato do CEP
     if (!/^\d{5}-\d{3}$/.test(formData.cep)) {
       setMensagem("CEP inválido! Use o formato 99999-999.");
       setMensagemTipo("erro");
       return;
     }
 
-    // Validação de UF
     if (formData.estado.length !== 2) {
       setMensagem("O campo Estado (UF) deve ter exatamente 2 letras.");
       setMensagemTipo("erro");
@@ -165,9 +157,7 @@ const EnderecosPage = () => {
     setMensagem("");
   };
 
-  // Simulação de modal de confirmação, pois window.confirm() não é permitido
   const handleDeletar = async (id) => {
-    // Usando prompt simples para confirmação
     const isConfirmed = prompt(
       `Deseja realmente deletar o endereço ID ${id}? Digite 'SIM' para confirmar.`
     );
@@ -199,9 +189,9 @@ const EnderecosPage = () => {
           {mensagem}
         </p>
       )}
-      {/* CONTAINER GRID - APLICA O LAYOUT DE 2 COLUNAS */}
+
       <div className="enderecos-container">
-        {/* 1. BLOCO DO FORMULÁRIO (CARD) - Esquerda */}
+        {/* CARD DE CADASTRO */}
         <div className="endereco-form-card">
           <h2>Cadastro de Endereço</h2>
 
@@ -272,7 +262,8 @@ const EnderecosPage = () => {
               required
             />
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            {/* Botões centralizados e maiores */}
+            <div className="botoes-container">
               <button
                 type="submit"
                 className={editandoId ? "atualizar" : "cadastrar"}
@@ -290,17 +281,15 @@ const EnderecosPage = () => {
               )}
             </div>
           </form>
-        </div>{" "}
-        {/* FIM DO ENDERECO-FORM-CARD */}
-        {/* 2. BLOCO DA LISTA (CARD) - Direita */}
+        </div>
+
+        {/* CARD DA LISTA */}
         <div className="endereco-lista-card">
           <h3>Lista de Endereços</h3>
           {enderecos.length === 0 ? (
             <p className="sem-registro">Nenhum endereço cadastrado ainda.</p>
           ) : (
             <div style={{ overflowX: "auto" }}>
-              {" "}
-              {/* Permite rolagem horizontal da tabela em telas pequenas */}
               <table className="tabela-cadastro">
                 <thead>
                   <tr>
@@ -346,10 +335,8 @@ const EnderecosPage = () => {
               </table>
             </div>
           )}
-        </div>{" "}
-        {/* FIM DO ENDERECO-LISTA-CARD */}
-      </div>{" "}
-      {/* FIM DO ENDERECOS-CONTAINER */}
+        </div>
+      </div>
     </div>
   );
 };

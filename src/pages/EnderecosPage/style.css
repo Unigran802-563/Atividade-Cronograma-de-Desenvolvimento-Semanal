@@ -1,283 +1,282 @@
-/* ========================================
-    ARQUIVO: style.css (DESIGN APRIMORADO)
-    - Mantém o layout de 2 colunas e a usabilidade compacta.
-    - Foca em estética mais profissional com mais contraste, sombras suaves e tabela aprimorada.
-    - Aplicado o grid para o enderecos-container e o brilho roxo nos cards.
-    ======================================== */
-
-/* Variáveis */
-:root {
-    --cor-roxo: #7C3AED; /* Roxo mais profundo para destaque */
-    --cor-roxo-claro: #A78BFA;
-    --cor-roxo-escuro: #6D28D9;
-    --cor-preto: #121212; /* Fundo mais escuro */
-    --cor-preto-claro: #1A1A1A; /* Fundo dos cards */
-    --cor-cinza-escuro: #2D2D2D; /* Input/Borda/Linha */
-    --cor-cinza-claro: #383838; /* Fundo de linhas alternadas da tabela */
-    --cor-texto-principal: #E5E7EB; /* Texto mais claro */
-    --cor-verde: #10B981;
-    --cor-verde-escuro: #047857;
-    --cor-texto-secundario: #9CA3AF;
-    --border-radius-lg: 12px;
-    --border-radius-md: 8px;
-    --espacamento-sm: 8px;
-    --espacamento-md: 12px;
-    --espacamento-lg: 16px;
-    --espacamento-xl: 24px;
-    --espacamento-2xl: 32px;
-    --transition-fast: 0.2s;
-    --shadow-deep: 0 10px 30px rgba(0, 0, 0, 0.6); /* Sombra mais profunda e suave */
-    /* NOVA VARIÁVEL: Roxo mais intenso para a borda (Brilho Lilás) */
-    --cor-borda-lilás: rgba(124, 58, 237, 0.6);
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--cor-preto);
-    font-family: 'Inter', sans-serif;
-    color: var(--cor-texto-principal);
-    font-size: 17px; /* Aumento sutil da fonte base para 17px */
-}
-
-/* ------------------------------------------------ */
-/* LAYOUT E ESTRUTURA (Layout de 2 Colunas) */
-/* ------------------------------------------------ */
-
-/* Container Principal da Página */
+/* === ESTILO GERAL === */
 .container {
-    width: 95%; 
-    max-width: 1600px; /* AUMENTADO para 1600px */
-    margin: 40px auto;
-    padding: var(--espacamento-lg); 
+  min-height: 100vh;
+  background-color: #121212;
+  color: #f5f5f5;
+  font-family: "Poppins", sans-serif;
+  padding: 40px 6%;
+  box-sizing: border-box;
 }
 
-/* CONTAINER: Aplica o layout de 2 colunas (Grid) para Endereços */
-.enderecos-container { 
-    display: grid;
-    /* ALTERADO: Proporção 1fr 1fr para que Cadastro e Lista tenham o mesmo tamanho (50% cada) */
-    grid-template-columns: 1fr 1fr; 
-    gap: var(--espacamento-xl); 
-    align-items: start; 
+/* Mensagens */
+.mensagem {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  background-color: #1b1b1b;
+  border-left: 5px solid #4caf50;
+}
+.mensagem.erro {
+  border-left-color: #f44336;
 }
 
-/* Responsividade: Transforma em coluna única em telas pequenas */
-@media (max-width: 1024px) {
-    .enderecos-container {
-        grid-template-columns: 1fr;
-    }
+/* === LAYOUT GERAL === */
+.pedidos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
 }
 
-/* ------------------- ESTILO DOS CARDS INDIVIDUAIS ------------------- */
-
-/* Cards Base */
-.endereco-form-card,
-.endereco-lista-card {
-    padding: var(--espacamento-xl); /* Mais padding */
-    background-color: var(--cor-preto-claro); 
-    border-radius: var(--border-radius-lg); 
-    box-shadow: var(--shadow-deep); 
-    
-    /* BORDA LILÁS/ROXA E BRILHO MAIS FORTE */
-    border: 1px solid var(--cor-roxo-escuro); 
-    box-shadow: 0 0 20px var(--cor-borda-lilás), var(--shadow-deep); 
+/* === FORMULÁRIO === */
+.pedido-form-card {
+  background: #1e1e1e;
+  padding: 50px 70px;
+  border-radius: 16px;
+  box-shadow: 0 0 18px rgba(137, 87, 255, 0.25);
+  border: 1px solid rgba(137, 87, 255, 0.4);
+  transition: 0.3s ease;
+  max-width: 1200px;
+  width: 90%;
+  margin: 0 auto;
 }
 
-/* Card de Formulário (Bloco da Esquerda) */
-.endereco-form-card {
-    max-height: 85vh; 
-    overflow-y: auto; 
+.pedido-form-card:hover {
+  box-shadow: 0 0 25px rgba(137, 87, 255, 0.45);
 }
 
-/* Card da Lista (Bloco da Direita) */
-.endereco-lista-card {
-    max-height: 85vh; 
-    /* Removendo o overflow-y: auto daqui, pois o overflow da tabela será tratado internamente
-       para que a tabela possa rolar horizontalmente se necessário, mas o card em si não */
+.pedido-form-card h2 {
+  color: #a175ff;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 35px;
+  text-align: center;
 }
 
-/* Títulos Internos dos Cards */
-.endereco-form-card h2,
-.endereco-lista-card h3 {
-    color: var(--cor-roxo-claro); 
-    font-size: 1.8rem; /* AUMENTADO */
-    margin-bottom: var(--espacamento-md); 
-    border-bottom: 2px solid var(--cor-cinza-escuro); 
-    padding-bottom: var(--espacamento-sm); 
-    text-align: center; 
-}
-
-/* ------------------------------------------------ */
-/* ESTILOS DE FORMULÁRIO */
-/* ------------------------------------------------ */
-
+/* === CAMPOS === */
 .form-cadastro {
-    display: flex;
-    flex-direction: column;
-    gap: var(--espacamento-md); 
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 30px 50px;
+  justify-items: center;
 }
 
-/* Rótulos (Labels) */
 .form-cadastro label {
-    font-size: 1.05rem; /* AUMENTADO */
-    color: var(--cor-texto-secundario); 
-    font-weight: 500;
-    margin-top: var(--espacamento-sm); /* Espaço entre campos */
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #e3dfff;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 90%;
 }
 
-/* Campos de Input/Select (Área de Digitação) */
 .form-cadastro input,
 .form-cadastro select {
-    padding: var(--espacamento-md); 
-    font-size: 1.05rem; /* AUMENTADO */
-    border: 1px solid var(--cor-cinza-escuro); 
-    background-color: #222222; 
-    color: var(--cor-texto-principal);
-    border-radius: var(--border-radius-md);
-    transition: all var(--transition-fast);
+  width: 95%;
+  padding: 20px 25px;
+  border-radius: 30px;
+  border: 1px solid #444;
+  background: #111;
+  color: #fff;
+  font-size: 1.6rem;
+  display: block;
+  margin: 0 auto;
+  transition: 0.3s;
 }
 
 .form-cadastro input:focus,
 .form-cadastro select:focus {
-    border-color: var(--cor-roxo); 
-    background-color: #282828;
-    box-shadow: 0 0 0 2px var(--cor-roxo-escuro); 
-    outline: none;
+  outline: none;
+  border-color: #a175ff;
+  background: #292929;
 }
 
-/* Grupo de Botões (Ações do Formulário) */
-.form-cadastro > div[style*="display: flex"] {
-    margin-top: var(--espacamento-xl); 
-    padding-top: var(--espacamento-md); 
-    border-top: 1px solid var(--cor-cinza-escuro);
+/* === BOTÕES === */
+.botoes-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
 }
 
-/* Botões de Ação (Estilo PUSH/Elevado) */
-.form-cadastro button {
-    padding: var(--espacamento-md) var(--espacamento-xl); 
-    font-size: 1.05rem; /* AUMENTADO */
-    font-weight: 600; 
-    border-radius: var(--border-radius-md);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); 
-    border: none;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    color: white; /* Cor do texto padrão */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
 }
 
-/* Cores dos Botões */
-.form-cadastro button.cadastrar {
-    background-color: var(--cor-verde);
-}
-.form-cadastro button.cadastrar:hover {
-    background-color: var(--cor-verde-escuro);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.6);
-}
-.form-cadastro button.atualizar {
-    background-color: var(--cor-roxo);
-}
-.form-cadastro button.atualizar:hover {
-    background-color: var(--cor-roxo-escuro);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.6);
-}
-.form-cadastro button.cancelar {
-    background-color: var(--cor-cinza-escuro); 
-}
-.form-cadastro button.cancelar:hover {
-    background-color: #4A4A4A;
+button.cadastrar,
+button.atualizar {
+  background-color: #8e4fff;
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: bold;
+  border-radius: 20px;
+  padding: 30px 0;
+  width: 100%;
+  max-width: 450px;
+  transition: all 0.3s ease;
 }
 
-/* Botões da Tabela (Editar/Deletar) */
-.button-group button {
-    font-size: 0.95rem; /* AUMENTADO */
-    padding: 6px 10px;
-    margin-right: 5px;
-    box-shadow: none;
-}
-.button-group button.editar {
-    background-color: var(--cor-roxo-claro);
-}
-.button-group button.editar:hover {
-    background-color: var(--cor-roxo);
-}
-.button-group button.deletar {
-    background-color: #EF4444; /* Vermelho */
-}
-.button-group button.deletar:hover {
-    background-color: #DC2626;
+button.cadastrar:hover,
+button.atualizar:hover {
+  background-color: #a175ff;
+  transform: scale(1.03);
 }
 
-
-/* Mensagens de feedback */
-.mensagem {
-    padding: var(--espacamento-md);
-    margin-bottom: var(--espacamento-lg);
-    font-weight: 700;
-    border-radius: var(--border-radius-md);
-    text-align: center;
-    background-color: var(--cor-verde);
-    color: var(--cor-preto-claro);
-    font-size: 1.05rem; /* AUMENTADO */
+button.cancelar {
+  background-color: #555;
+  color: #fff;
+  font-size: 1.3rem;
+  padding: 14px 0;
+  border-radius: 12px;
+  width: 60%;
+  max-width: 320px;
+  margin-top: 12px;
+  transition: background 0.3s ease;
 }
 
-.mensagem.erro {
-    background-color: #DC2626; 
-    color: white;
+button.cancelar:hover {
+  background-color: #777;
 }
 
-/* ------------------------------------------------ */
-/* ESTILOS DA TABELA */
-/* ------------------------------------------------ */
-
-.tabela-cadastro {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: var(--espacamento-lg); 
+/* === LISTA === */
+.pedido-lista-card {
+  background: #1e1e1e;
+  padding: 40px 50px;
+  border-radius: 16px;
+  box-shadow: 0 0 12px rgba(137, 87, 255, 0.25);
+  border: 1px solid rgba(137, 87, 255, 0.35);
+  max-width: 1200px;
+  width: 90%;
+  margin: 0 auto;
 }
 
-/* Tabela Headers */
-.tabela-cadastro thead th {
-    background-color: var(--cor-roxo-escuro); 
-    font-size: 1rem; /* AUMENTADO */
-    padding: var(--espacamento-md); 
-    text-align: left;
-    color: white;
+.pedido-lista-card h3 {
+  color: #a175ff;
+  margin-bottom: 30px;
+  font-size: 1.7rem;
+  text-align: center;
 }
 
-/* Tabela Linhas */
-.tabela-cadastro tbody tr td {
-    padding: var(--espacamento-md); 
-    font-size: 1rem; /* AUMENTADO */
+/* === TABELA === */
+.tabela-pedidos {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.15rem;
 }
 
-.tabela-cadastro tbody tr:nth-child(even) {
-    background-color: var(--cor-cinza-escuro); 
+.tabela-pedidos th,
+.tabela-pedidos td {
+  border: 1px solid #333;
+  padding: 14px 16px;
+  text-align: center;
 }
 
-.tabela-cadastro tbody tr:nth-child(odd) {
-    background-color: var(--cor-preto-claro); 
+.tabela-pedidos th {
+  background: #292929;
+  color: #a175ff;
+  font-weight: 600;
 }
 
-.tabela-cadastro tbody tr:hover {
-    background-color: var(--cor-roxo); 
-    color: white;
-    transition: all var(--transition-fast);
+.tabela-pedidos tr:nth-child(even) {
+  background: #1a1a1a;
 }
 
-.tabela-cadastro td {
-    border-bottom: 1px solid var(--cor-cinza-claro);
+.tabela-pedidos tr:hover {
+  background: #2b2b2b;
 }
 
-.tabela-cadastro tr:last-child td {
-    border-bottom: none;
+/* === STATUS (chips) === */
+.status-chip {
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+  font-size: 1rem;
 }
 
+.status-chip.em_preparo {
+  background-color: #facc15;
+  color: #1e1e1e;
+}
+
+.status-chip.pronto {
+  background-color: #4caf50;
+  color: #f0fdf4;
+}
+
+.status-chip.cancelado {
+  background-color: #f44336;
+  color: #fff;
+}
+
+/* === AÇÕES === */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+button.editar {
+  background: #4caf50;
+  color: #fff;
+}
+button.editar:hover {
+  background: #66bb6a;
+}
+
+button.deletar {
+  background: #f44336;
+  color: #fff;
+}
+button.deletar:hover {
+  background: #ef5350;
+}
+
+/* === SEM REGISTRO === */
 .sem-registro {
-    text-align: center;
-    color: var(--cor-texto-secundario);
-    padding: var(--espacamento-xl);
-    font-style: italic;
-    font-size: 1.05rem; /* AUMENTADO */
+  text-align: center;
+  color: #bbb;
+  font-style: italic;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .pedido-form-card,
+  .pedido-lista-card {
+    width: 100%;
+    padding: 30px 25px;
+  }
+
+  .form-cadastro {
+    grid-template-columns: 1fr;
+  }
+
+  .form-cadastro label {
+    font-size: 1.1rem;
+  }
+
+  .form-cadastro input {
+    font-size: 1.2rem;
+    padding: 12px 16px;
+  }
+
+  button.cadastrar {
+    font-size: 1.8rem;
+    padding: 20px;
+  }
+
+  .tabela-pedidos th,
+  .tabela-pedidos td {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
 }

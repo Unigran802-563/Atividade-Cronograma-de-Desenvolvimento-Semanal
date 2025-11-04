@@ -32,12 +32,13 @@
   color: white;
 }
 
-/* Layout geral: formulário à esquerda e lista à direita */
+/* Layout vertical: formulário em cima, lista embaixo */
 .pedidos-container {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 20px;
+  display: flex;
+  flex-direction: column; 
+  gap: 20px; 
 }
+
 
 @media (max-width: 900px) {
   .pedidos-container {
