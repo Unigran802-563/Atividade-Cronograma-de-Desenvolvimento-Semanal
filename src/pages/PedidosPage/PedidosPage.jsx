@@ -1,270 +1,115 @@
 import React, { useState, useEffect } from "react";
-import "../PedidosPage/PedidosPage.css";
+import "./PedidosPage.css";
 
-const PedidoPage = () => {
-  const [pedidos, setPedidos] = useState([]);
-  const [formData, setFormData] = useState({
-    id_pedido: "",
-    cliente_id: "",
-    data_pedido: new Date().toISOString().substring(0, 10),
-    valor_total: 0,
+export default function PedidosPage() {
+  const [pedido, setPedido] = useState({
+    cliente: "",
+    produto: "",
+    quantidade: "",
     status: "em_preparo",
   });
-  const [mensagem, setMensagem] = useState("");
-  const [mensagemTipo, setMensagemTipo] = useState("");
-  const [editandoId, setEditandoId] = useState(null);
-
-  const API_URL = "http://localhost:3001";
-
-  useEffect(() => {
-    fetchPedidos();
-  }, []);
-
-  const fetchPedidos = async () => {
-    try {
-      const mockPedidos = [
-        {
-          id_pedido: "P001",
-          cliente_id: "C101",
-          data_pedido: "2024-10-25",
-          valor_total: 55.5,
-          status: "pronto",
-        },
-        {
-          id_pedido: "P002",
-          cliente_id: "C102",
-          data_pedido: "2024-10-25",
-          valor_total: 120.0,
-          status: "em_preparo",
-        },
-        {
-          id_pedido: "P003",
-          cliente_id: "C103",
-          data_pedido: "2024-10-24",
-          valor_total: 89.9,
-          status: "cancelado",
-        },
-        {
-          id_pedido: "P004",
-          cliente_id: "C104",
-          data_pedido: "2024-10-23",
-          valor_total: 35.2,
-          status: "em_preparo",
-        },
-      ];
-      setPedidos(mockPedidos);
-    } catch (err) {
-      console.error(`Erro ao buscar pedidos: ${err.message}`);
-      setMensagem("Erro ao carregar lista de pedidos.");
-      setMensagemTipo("erro");
-    }
-  };
+  const [pedidos, setPedidos] = useState([]);
+  const [editando, setEditando] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setPedido({ ...pedido, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    const { id_pedido, cliente_id, data_pedido, valor_total, status } = {
-      ...formData,
-    };
-
-    if (!id_pedido || !cliente_id || !data_pedido || valor_total === "") {
-      setMensagem("Preencha todos os campos obrigatórios!");
-      setMensagemTipo("erro");
-      return;
+    if (editando) {
+      const atualizados = pedidos.map((p) =>
+        p.id === pedido.id ? pedido : p
+      );
+      setPedidos(atualizados);
+      setEditando(false);
+    } else {
+      setPedidos([...pedidos, { ...pedido, id: Date.now() }]);
     }
-
-    if (parseFloat(valor_total) < 0) {
-      setMensagem("O valor total não pode ser negativo!");
-      setMensagemTipo("erro");
-      return;
-    }
-
-    const idDuplicado = pedidos.some(
-      (p) => p.id_pedido === id_pedido && p.id_pedido !== editandoId
-    );
-    if (idDuplicado) {
-      setMensagem("ID do pedido já cadastrado!");
-      setMensagemTipo("erro");
-      return;
-    }
-
-    try {
-      const method = editandoId ? "PUT" : "POST";
-      const url = editandoId
-        ? `${API_URL}/pedido/${editandoId}`
-        : `${API_URL}/pedido`;
-
-      const res = { ok: true };
-
-      if (res.ok) {
-        setMensagem(
-          editandoId
-            ? "Pedido atualizado com sucesso!"
-            : "Pedido cadastrado com sucesso!"
-        );
-        setMensagemTipo("sucesso");
-        handleCancelar();
-        fetchPedidos();
-      } else {
-        setMensagem("Erro ao atualizar pedido!");
-        setMensagemTipo("erro");
-      }
-    } catch (err) {
-      setMensagem(`Erro: ${err.message}`);
-      setMensagemTipo("erro");
-    }
+    setPedido({ cliente: "", produto: "", quantidade: "", status: "em_preparo" });
   };
 
-  const handleEditar = (pedido) => {
-    setFormData({
-      id_pedido: pedido.id_pedido,
-      cliente_id: pedido.cliente_id,
-      data_pedido: pedido.data_pedido,
-      valor_total: pedido.valor_total,
-      status: pedido.status,
-    });
-    setEditandoId(pedido.id_pedido);
-    setMensagem("");
+  const handleEdit = (p) => {
+    setPedido(p);
+    setEditando(true);
   };
 
-  const handleCancelar = () => {
-    setFormData({
-      id_pedido: "",
-      cliente_id: "",
-      data_pedido: new Date().toISOString().substring(0, 10),
-      valor_total: 0,
-      status: "em_preparo",
-    });
-    setEditandoId(null);
-    setMensagem("");
-  };
-
-  const handleDeletar = async (id) => {
-    const isConfirmed = prompt(
-      `Deseja realmente deletar o pedido ID ${id}? Digite 'SIM' para confirmar.`
-    );
-    if (isConfirmed !== "SIM") return;
-
-    try {
-      const res = { ok: true };
-
-      if (res.ok) {
-        setMensagem("Pedido deletado!");
-        setMensagemTipo("sucesso");
-        fetchPedidos();
-      } else {
-        setMensagem(`Erro ao deletar pedido.`);
-        setMensagemTipo("erro");
-      }
-    } catch (err) {
-      setMensagem(`Erro: ${err.message}`);
-      setMensagemTipo("erro");
-    }
+  const handleDelete = (id) => {
+    setPedidos(pedidos.filter((p) => p.id !== id));
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen">
+    <div className="bg-gray-900">
       <div className="container-principal">
-        {mensagem && (
-          <p
-            className={`mensagem ${
-              mensagemTipo === "erro" ? "error" : "success"
-            }`}
-          >
-            {mensagem}
-          </p>
-        )}
+        <h1 className="titulo-principal">Cadastro de Pedidos</h1>
 
         <div className="pedidos-container">
           {/* FORMULÁRIO */}
-          <div className="card-base card-form">
-            <h2 className="card-header">
-              {editandoId
-                ? `Atualizar Pedido (ID: ${editandoId})`
-                : "Novo Pedido"}
-            </h2>
+          <div className="card-base">
+            <h2 className="card-header">{editando ? "Editar Pedido" : "Novo Pedido"}</h2>
 
             <form className="form-cadastro" onSubmit={handleSubmit}>
-              <label className="form-label">ID Pedido</label>
+              <label className="form-label">Cliente</label>
               <input
                 type="text"
-                name="id_pedido"
-                className="form-input"
-                placeholder="ID Pedido"
-                value={formData.id_pedido}
+                name="cliente"
+                value={pedido.cliente}
                 onChange={handleChange}
+                className="form-input"
                 required
-                disabled={editandoId}
               />
 
-              <label className="form-label">ID Cliente</label>
+              <label className="form-label">Produto</label>
               <input
                 type="text"
-                name="cliente_id"
-                className="form-input"
-                placeholder="ID Cliente"
-                value={formData.cliente_id}
+                name="produto"
+                value={pedido.produto}
                 onChange={handleChange}
+                className="form-input"
                 required
               />
 
-              <label className="form-label">Data Pedido</label>
-              <input
-                type="date"
-                name="data_pedido"
-                className="form-input"
-                value={formData.data_pedido}
-                onChange={handleChange}
-                required
-              />
-
-              <label className="form-label">Valor Total</label>
+              <label className="form-label">Quantidade</label>
               <input
                 type="number"
-                name="valor_total"
-                className="form-input"
-                placeholder="Valor Total"
-                value={formData.valor_total}
+                name="quantidade"
+                value={pedido.quantidade}
                 onChange={handleChange}
+                className="form-input"
+                min="1"
                 required
               />
 
-              {editandoId && (
-                <>
-                  <label className="form-label">Status</label>
-                  <select
-                    name="status"
-                    className="form-select"
-                    value={formData.status}
-                    onChange={handleChange}
-                  >
-                    <option value="em_preparo">Em preparo</option>
-                    <option value="pronto">Pronto</option>
-                    <option value="cancelado">Cancelado</option>
-                  </select>
-                </>
-              )}
+              <label className="form-label">Status</label>
+              <select
+                name="status"
+                value={pedido.status}
+                onChange={handleChange}
+                className="form-select"
+              >
+                <option value="em_preparo">Em preparo</option>
+                <option value="pronto">Pronto</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
 
               <div className="button-group">
-                <button
-                  type="submit"
-                  className={`btn-base ${
-                    editandoId ? "btn-atualizar" : "btn-cadastrar"
-                  }`}
-                >
-                  {editandoId ? "Atualizar" : "Cadastrar"}
+                <button type="submit" className="btn-base btn-cadastrar">
+                  {editando ? "Atualizar" : "Cadastrar"}
                 </button>
-
-                {editandoId && (
+                {editando && (
                   <button
                     type="button"
-                    onClick={handleCancelar}
                     className="btn-base btn-cancelar"
+                    onClick={() => {
+                      setEditando(false);
+                      setPedido({
+                        cliente: "",
+                        produto: "",
+                        quantidade: "",
+                        status: "em_preparo",
+                      });
+                    }}
                   >
                     Cancelar
                   </button>
@@ -275,50 +120,46 @@ const PedidoPage = () => {
 
           {/* LISTA DE PEDIDOS */}
           <div className="card-base">
-            <h3 className="card-header">Lista de Pedidos ({pedidos.length})</h3>
+            <h2 className="card-header">Lista de Pedidos</h2>
 
             {pedidos.length === 0 ? (
-              <p className="lista-vazia">Nenhum pedido cadastrado ainda.</p>
+              <p className="lista-vazia">Nenhum pedido cadastrado.</p>
             ) : (
               <div className="tabela-wrapper">
                 <table className="tabela-pedidos">
                   <thead>
                     <tr>
-                      <th>ID</th>
                       <th>Cliente</th>
-                      <th>Data</th>
-                      <th>Valor</th>
+                      <th>Produto</th>
+                      <th>Quantidade</th>
                       <th>Status</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pedidos.map((p) => (
-                      <tr key={p.id_pedido}>
-                        <td>{p.id_pedido}</td>
-                        <td>{p.cliente_id}</td>
-                        <td>{p.data_pedido}</td>
-                        <td>R$ {p.valor_total.toFixed(2)}</td>
+                      <tr key={p.id}>
+                        <td>{p.cliente}</td>
+                        <td>{p.produto}</td>
+                        <td>{p.quantidade}</td>
                         <td>
                           <span className={`status-chip ${p.status}`}>
-                            {p.status.toUpperCase().replace("_", " ")}
+                            {p.status.replace("_", " ")}
                           </span>
                         </td>
-                        <td>
-                          <div className="tabela-acoes">
-                            <button
-                              className="btn-editar-tabela"
-                              onClick={() => handleEditar(p)}
-                            >
-                              ✏️
-                            </button>
-                            <button
-                              className="btn-deletar-tabela"
-                              onClick={() => handleDeletar(p.id_pedido)}
-                            >
-                              🗑️
-                            </button>
-                          </div>
+                        <td className="tabela-acoes">
+                          <button
+                            className="btn-editar-tabela"
+                            onClick={() => handleEdit(p)}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn-deletar-tabela"
+                            onClick={() => handleDelete(p.id)}
+                          >
+                            🗑️
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -331,6 +172,4 @@ const PedidoPage = () => {
       </div>
     </div>
   );
-};
-
-export default PedidoPage;
+}

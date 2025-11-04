@@ -12,7 +12,7 @@ const ClientesPage = () => {
     id_endereco: "",
   });
   const [mensagem, setMensagem] = useState("");
-  const [mensagemTipo, setMensagemTipo] = useState(""); // 'sucesso' ou 'erro'
+  const [mensagemTipo, setMensagemTipo] = useState("");
   const [editandoId, setEditandoId] = useState(null);
 
   const API_URL = "http://localhost:3001";
@@ -49,8 +49,8 @@ const ClientesPage = () => {
   };
 
   const handleTelefoneChange = (e) => {
-    let valor = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
-    if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos // Formata como (99) 99999-9999 ou (99) 9999-9999
+    let valor = e.target.value.replace(/\D/g, "");
+    if (valor.length > 11) valor = valor.slice(0, 11);
     if (valor.length > 6) {
       valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4})$/, "($1) $2-$3");
     } else if (valor.length > 2) {
@@ -62,32 +62,21 @@ const ClientesPage = () => {
   const validarCPF = (cpf) => {
     cpf = cpf.replace(/[^\d]+/g, "");
     if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-
     let soma = 0;
     for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
     let resto = soma % 11;
     let dig1 = resto < 2 ? 0 : 11 - resto;
     if (dig1 !== parseInt(cpf.charAt(9))) return false;
-
     soma = 0;
     for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
     resto = soma % 11;
     let dig2 = resto < 2 ? 0 : 11 - resto;
-    if (dig2 !== parseInt(cpf.charAt(10))) return false;
-
-    return true;
+    return dig2 === parseInt(cpf.charAt(10));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Todos os campos obrigatórios
-
-    const camposObrigatorios = [
-      "id_cliente",
-      "nome",
-      "telefone",
-      "cpf",
-      "id_endereco",
-    ];
+    e.preventDefault();
+    const camposObrigatorios = ["id_cliente", "nome", "telefone", "cpf", "id_endereco"];
     for (const campo of camposObrigatorios) {
       if (!formData[campo]) {
         setMensagem(`O campo ${campo} é obrigatório!`);
@@ -200,166 +189,136 @@ const ClientesPage = () => {
 
   return (
     <div className="container">
-            {/* <h2>Cadastro de Cliente</h2> <--- REMOVIDO! */}     {" "}
       {mensagem && (
         <p className={`mensagem ${mensagemTipo === "erro" ? "erro" : ""}`}>
-                    {mensagem}       {" "}
+          {mensagem}
         </p>
       )}
-               {" "}
-      <div className="clientes-container">
-                {/* 1. BLOCO DO FORMULÁRIO (CARD) */}       {" "}
-        <div className="cliente-form-card">
-                  {/* <--- ADICIONADO AQUI! Título dentro do card. */}
-          <h3>Cadastro de Cliente</h3>                   {" "}
-          <form onSubmit={handleSubmit} className="form-cadastro">
-                        <label>ID Cliente</label>
-                       {" "}
-            <input
-              type="text"
-              name="id_cliente"
-              placeholder="ID Cliente"
-              value={formData.id_cliente}
-              onChange={handleChange}
-              required
-              disabled={editandoId}
-            />
-                        <label>Nome</label>
-                       {" "}
-            <input
-              type="text"
-              name="nome"
-              placeholder="Nome"
-              value={formData.nome}
-              onChange={handleChange}
-              required
-            />
-                        <label>Telefone</label>
-                       {" "}
-            <input
-              type="text"
-              name="telefone"
-              placeholder="Telefone"
-              value={formData.telefone}
-              onChange={handleTelefoneChange}
-              required
-            />
-                        <label>CPF</label>
-                       {" "}
-            <input
-              type="text"
-              name="cpf"
-              placeholder="CPF"
-              value={formData.cpf}
-              onChange={handleChange}
-              required
-            />
-                        <label>ID Endereço</label>           {" "}
-            <select
-              name="id_endereco"
-              value={formData.id_endereco}
-              onChange={handleChange}
-              required
+
+      {/* Formulário em cima */}
+      <div className="cliente-form-card">
+        <h3>Cadastro de Cliente</h3>
+        <form onSubmit={handleSubmit} className="form-cadastro">
+          <label>ID Cliente</label>
+          <input
+            type="text"
+            name="id_cliente"
+            placeholder="ID Cliente"
+            value={formData.id_cliente}
+            onChange={handleChange}
+            required
+            disabled={editandoId}
+          />
+
+          <label>Nome</label>
+          <input
+            type="text"
+            name="nome"
+            placeholder="Nome"
+            value={formData.nome}
+            onChange={handleChange}
+            required
+          />
+
+          <label>Telefone</label>
+          <input
+            type="text"
+            name="telefone"
+            placeholder="Telefone"
+            value={formData.telefone}
+            onChange={handleTelefoneChange}
+            required
+          />
+
+          <label>CPF</label>
+          <input
+            type="text"
+            name="cpf"
+            placeholder="CPF"
+            value={formData.cpf}
+            onChange={handleChange}
+            required
+          />
+
+          <label>ID Endereço</label>
+          <select
+            name="id_endereco"
+            value={formData.id_endereco}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Selecione...</option>
+            {enderecos.map((e) => (
+              <option key={e.id_endereco} value={e.id_endereco}>
+                {e.rua}, {e.numero} - {e.cidade}
+              </option>
+            ))}
+          </select>
+
+          <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
+            <button
+              type="submit"
+              className={editandoId ? "atualizar" : "cadastrar"}
             >
-                            <option value="">Selecione...</option>             {" "}
-              {enderecos.map((e) => (
-                <option key={e.id_endereco} value={e.id_endereco}>
-                                    {e.rua}, {e.numero} - {e.cidade}           
-                     {" "}
-                </option>
-              ))}
-                         {" "}
-            </select>
-                       {" "}
-            <div style={{ display: "flex", gap: "10px" }}>
-                           {" "}
+              {editandoId ? "Atualizar" : "Cadastrar"}
+            </button>
+            {editandoId && (
               <button
-                type="submit"
-                className={editandoId ? "atualizar" : "cadastrar"}
+                type="button"
+                className="cancelar"
+                onClick={handleCancelar}
               >
-                                {editandoId ? "Atualizar" : "Cadastrar"}       
-                     {" "}
+                Cancelar
               </button>
-                           {" "}
-              {editandoId && (
-                <button
-                  type="button"
-                  className="cancelar"
-                  onClick={handleCancelar}
-                >
-                                    Cancelar                {" "}
-                </button>
-              )}
-                         {" "}
-            </div>
-                     {" "}
-          </form>
-                 {" "}
-        </div>{" "}
-        {/* FIM DO CLIENTE-FORM-CARD */}        {/* 2. BLOCO DA LISTA (CARD) */}
-               {" "}
-        <div className="cliente-lista-card">
-                    <h3>Lista de Clientes</h3>         {" "}
-          {clientes.length === 0 ? (
-            <p className="sem-registro">Nenhum cliente cadastrado ainda.</p>
-          ) : (
-            <table className="tabela-cadastro">
-                           {" "}
-              <thead>
-                               {" "}
-                <tr>
-                                    <th>ID</th>                  <th>Nome</th> 
-                                  <th>Telefone</th>                 {" "}
-                  <th>CPF</th>                  <th>Endereço</th>               
-                    <th>Ações</th>               {" "}
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Lista embaixo */}
+      <div className="cliente-lista-card" style={{ marginTop: "40px" }}>
+        <h3>Lista de Clientes</h3>
+        {clientes.length === 0 ? (
+          <p className="sem-registro">Nenhum cliente cadastrado ainda.</p>
+        ) : (
+          <table className="tabela-cadastro">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>CPF</th>
+                <th>Endereço</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientes.map((c) => (
+                <tr key={c.id_cliente}>
+                  <td>{c.id_cliente}</td>
+                  <td>{c.nome}</td>
+                  <td>{c.telefone}</td>
+                  <td>{c.cpf}</td>
+                  <td>{c.id_endereco}</td>
+                  <td>
+                    <div className="button-group">
+                      <button className="editar" onClick={() => handleEditar(c)}>
+                        Editar
+                      </button>
+                      <button
+                        className="deletar"
+                        onClick={() => handleDeletar(c.id_cliente)}
+                      >
+                        Deletar
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-                             {" "}
-              </thead>
-                           {" "}
-              <tbody>
-                               {" "}
-                {clientes.map((c) => (
-                  <tr key={c.id_cliente}>
-                                        <td>{c.id_cliente}</td>                 
-                      <td>{c.nome}</td>                    <td>{c.telefone}</td>
-                                        <td>{c.cpf}</td>                   {" "}
-                    <td>{c.id_endereco}</td>                   {" "}
-                    <td>
-                                           {" "}
-                      <div className="button-group">
-                                               {" "}
-                        <button
-                          className="editar"
-                          onClick={() => handleEditar(c)}
-                        >
-                                                    Editar                      
-                           {" "}
-                        </button>
-                                               {" "}
-                        <button
-                          className="deletar"
-                          onClick={() => handleDeletar(c.id_cliente)}
-                        >
-                                                    Deletar                    
-                             {" "}
-                        </button>
-                                             {" "}
-                      </div>
-                                         {" "}
-                    </td>
-                                     {" "}
-                  </tr>
-                ))}
-                             {" "}
-              </tbody>
-                         {" "}
-            </table>
-          )}
-                 {" "}
-        </div>{" "}
-        {/* FIM DO CLIENTE-LISTA-CARD */}     {" "}
-      </div>{" "}
-      {/* FIM DO CLIENTES-CONTAINER */}   {" "}
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };

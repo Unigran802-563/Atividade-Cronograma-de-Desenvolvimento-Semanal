@@ -1,233 +1,259 @@
-/* ========================================
-    ARQUIVO: src/pages/ClientesPage/style.css (FINAL - Fontes e Botões GIGANTES)
-    ======================================== */
-
-/* Configurações Globais (Mantidas) */
-:root {
-    /* Variáveis (necessárias para o CSS funcionar) */
-    --cor-roxo: #A78BFA;
-    --cor-roxo-escuro: #8B5CF6;
-    --cor-preto: #1e1e1e;
-    --cor-preto-claro: #282828;
-    --cor-cinza-escuro: #3A3A3A;
-    --cor-texto-principal: #F0F0F0;
-    --cor-verde: #10B981;
-    --cor-verde-escuro: #059669;
-    --border-radius-lg: 12px;
-    --border-radius-md: 8px;
-    --border-radius-sm: 4px;
-    --espacamento-xs: 4px;
-    --espacamento-sm: 8px;
-    --espacamento-md: 12px;
-    --espacamento-lg: 16px;
-    --espacamento-xl: 24px;
-    --espacamento-2xl: 32px;
-    --transition-fast: 0.2s;
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--cor-preto);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--cor-texto-principal);
-}
-
-/* ------------------------------------------------ */
-/* LAYOUT E ESTRUTURA */
-/* ------------------------------------------------ */
-
-/* Container Principal da Página */
+/* === ESTILO GERAL === */
 .container {
-    width: 95%; 
-    max-width: 1400px; 
-    margin: 40px auto;
-    padding: var(--espacamento-2xl); 
-    background-color: transparent; 
-    border: none;
-    box-shadow: none;
+  min-height: 100vh;
+  background-color: #121212;
+  color: #f5f5f5;
+  font-family: "Poppins", sans-serif;
+  padding: 40px 6%;
+  box-sizing: border-box;
 }
 
-/* Container que aplica o layout de 2 colunas */
-.clientes-container { 
-    display: grid;
-    /* Mantém a proporção maior para o formulário */
-    grid-template-columns: 2.5fr 2fr; 
-    gap: var(--espacamento-xl); 
-    align-items: start; 
+/* Mensagens */
+.mensagem {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  background-color: #1b1b1b;
+  border-left: 5px solid #4caf50;
+}
+.mensagem.erro {
+  border-left-color: #f44336;
 }
 
-/* Card de Formulário (Bloco da Esquerda) */
+/* === LAYOUT GERAL === */
+.clientes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+/* === FORMULÁRIO === */
 .cliente-form-card {
-    padding: var(--espacamento-xl); 
-    background-color: var(--cor-preto-claro); 
-    border: 1px solid var(--cor-roxo); 
-    border-radius: var(--border-radius-lg); 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); 
-    height: fit-content; 
+  background: #1e1e1e;
+  padding: 50px 70px;
+  border-radius: 16px;
+  box-shadow: 0 0 18px rgba(137, 87, 255, 0.25);
+  border: 1px solid rgba(137, 87, 255, 0.4);
+  transition: 0.3s ease;
+  max-width: 1200px;   /* ← aumentamos o limite */
+  width: 90%;          /* ← mais largo */
+  margin: 0 auto;
 }
 
-/* Card da Lista (Bloco da Direita) */
-.cliente-lista-card {
-    padding: var(--espacamento-xl); 
-    background-color: var(--cor-preto-claro); 
-    border: 1px solid var(--cor-roxo); 
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    
-    max-height: 70vh; 
-    overflow-y: auto; 
+.cliente-form-card:hover {
+  box-shadow: 0 0 25px rgba(137, 87, 255, 0.45);
 }
 
-/* Títulos Internos dos Cards */
-.cliente-form-card h3,
-.cliente-lista-card h3 {
-    color: var(--cor-roxo); 
-    font-size: 2rem; /* Aumentado! */
-    font-weight: 700;
-    margin-top: 0;
-    margin-bottom: var(--espacamento-xl); /* Aumentado o espaçamento abaixo do título */
-    text-align: center; 
-    border-bottom: 2px solid var(--cor-cinza-escuro); 
-    padding-bottom: var(--espacamento-md); /* Aumentado! */
-    line-height: 1.2;
+.cliente-form-card h2 {
+  color: #a175ff;
+  font-size: 2rem;
+  margin-bottom: 35px;
+  text-align: center;
 }
 
-/* ------------------------------------------------ */
-/* ESTILOS DE FORMULÁRIO (MAIS AUMENTADOS) */
-/* ------------------------------------------------ */
-
+/* === CAMPOS === */
 .form-cadastro {
-    display: flex;
-    flex-direction: column;
-    gap: var(--espacamento-xl); /* Aumenta o espaçamento entre os campos */
-    margin-bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 30px 50px;
+  justify-items: center;
 }
 
-/* ALTERADO: Aumenta o tamanho da fonte do rótulo (Nome, ID, Telefone, etc.) */
+/* Labels */
 .form-cadastro label {
-    font-size: 1.25rem; /* Aumentado de 1.1rem para 1.25rem */
-    color: var(--cor-texto-principal); 
-    font-weight: 600;
-    margin-bottom: 2px;
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #e3dfff;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 90%;
 }
 
-/* ALTERADO: Aumenta o padding e o tamanho da fonte dos campos de texto e select */
+/* Inputs e selects */
 .form-cadastro input,
 .form-cadastro select {
-    padding: var(--espacamento-xl); /* AUMENTADO SIGNIFICATIVAMENTE para deixar a área de digitação mais alta */
-    font-size: 1.3rem; /* Aumentado de 1.2rem para 1.3rem */
-    border: 2px solid transparent;
-    border-radius: var(--border-radius-md);
-    background-color: var(--cor-cinza-escuro);
-    color: var(--cor-texto-principal);
-    width: 100%;
-    box-sizing: border-box;
-    transition: all var(--transition-fast);
+  width: 95%;
+  padding: 20px 25px;
+  border-radius: 30px;
+  border: 1px solid #444;
+  background: #111;
+  color: #fff;
+  font-size: 1.6rem;
+  display: block;
+  margin: 0 auto;
+  transition: 0.3s;
 }
 
 .form-cadastro input:focus,
 .form-cadastro select:focus {
-    border-color: var(--cor-roxo);
-    background-color: #2D2D2D;
+  outline: none;
+  border-color: #a175ff;
+  background: #292929;
 }
 
-/* Grupo de Botões */
-.form-cadastro > div[style*="display: flex"] {
-    display: flex;
-    gap: var(--espacamento-lg) !important;
-    margin-top: var(--espacamento-lg); /* Aumenta o espaço antes dos botões */
-    padding-top: var(--espacamento-md); 
-    justify-content: center; 
+/* === BOTÕES === */
+.botoes-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
 }
 
-/* ALTERADO: Aumenta o tamanho dos botões de ação (Cadastrar/Atualizar/Cancelar) */
-.form-cadastro button.cadastrar,
-.form-cadastro button.atualizar,
-.form-cadastro button.cancelar {
-    padding: var(--espacamento-lg) var(--espacamento-2xl); /* Mais padding interno */
-    font-size: 1.3rem; /* Aumentado de 1.1rem para 1.3rem */
-    font-weight: 700; /* Deixa a fonte mais grossa */
-    border-radius: var(--border-radius-md);
-    flex: none; 
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
 }
 
-/* Cores dos Botões (Mantidas) */
-.form-cadastro button.cadastrar,
-.form-cadastro button.atualizar {
-    background-color: var(--cor-verde);
-    color: white;
-}
-.form-cadastro button.cadastrar:hover,
-.form-cadastro button.atualizar:hover {
-    background-color: var(--cor-verde-escuro);
-    transform: translateY(-2px);
-}
-.form-cadastro button.cancelar {
-    background-color: var(--cor-cinza-escuro);
-    color: var(--cor-texto-principal);
-}
-.form-cadastro button.cancelar:hover {
-    background-color: #3A3A3A;
+button.cadastrar,
+button.atualizar {
+  background-color: #8e4fff;
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: bold;
+  border-radius: 20px;
+  padding: 30px 0;
+  width: 100%;
+  max-width: 450px;
+  transition: all 0.3s ease;
 }
 
+button.cadastrar:hover,
+button.atualizar:hover {
+  background-color: #a175ff;
+  transform: scale(1.03);
+}
 
-/* ------------------------------------------------ */
-/* ESTILOS DA TABELA (Mantidos, mas garantindo consistência) */
-/* ------------------------------------------------ */
+/* Botão cancelar */
+button.cancelar {
+  background-color: #555;
+  color: #fff;
+  font-size: 1.3rem;
+  padding: 14px 0;
+  border-radius: 12px;
+  width: 60%;
+  max-width: 320px;
+  margin-top: 12px;
+  transition: background 0.3s ease;
+}
 
+button.cancelar:hover {
+  background-color: #777;
+}
+
+/* === LISTA === */
+.cliente-lista-card {
+  background: #1e1e1e;
+  padding: 40px 50px;
+  border-radius: 16px;
+  box-shadow: 0 0 12px rgba(137, 87, 255, 0.25);
+  border: 1px solid rgba(137, 87, 255, 0.35);
+  max-width: 1200px;  /* ← igual ao formulário */
+  width: 90%;         /* ← mais largo */
+  margin: 0 auto;
+}
+
+.cliente-lista-card h3 {
+  color: #a175ff;
+  margin-bottom: 30px;
+  font-size: 1.7rem;
+  text-align: center;
+}
+
+/* === TABELA === */
 .tabela-cadastro {
-    width: 100%;
-    border-collapse: separate; 
-    border-spacing: 0;
-    text-align: left;
-    margin-top: var(--espacamento-lg); /* Aumentado! */
-    background-color: var(--cor-cinza-escuro); 
-    border-radius: var(--border-radius-md); 
-    overflow: hidden; 
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.15rem;
 }
 
-/* Tabela Headers */
-.tabela-cadastro thead th {
-    background-color: var(--cor-roxo-escuro); 
-    color: white;
-    font-weight: 700;
-    font-size: 1.1rem; /* Levemente aumentado */
-    padding: var(--espacamento-md); 
-    position: sticky; 
-    top: 0; 
-    z-index: 10;
-}
-
-/* Tabela Dados */
+.tabela-cadastro th,
 .tabela-cadastro td {
-    border-bottom: 1px solid var(--cor-preto-claro); 
-    padding: var(--espacamento-md); /* Aumentado! */
-    color: var(--cor-texto-principal);
-    font-size: 1.05rem; /* Levemente aumentado */
-    line-height: 1.4;
+  border: 1px solid #333;
+  padding: 14px 16px;
+  text-align: center;
 }
 
-/* Ações na Tabela: Ícones (Mantidos) */
+.tabela-cadastro th {
+  background: #292929;
+  color: #a175ff;
+  font-weight: 600;
+}
+
+.tabela-cadastro tr:nth-child(even) {
+  background: #1a1a1a;
+}
+
+.tabela-cadastro tr:hover {
+  background: #2b2b2b;
+}
+
+/* === AÇÕES === */
 .button-group {
-    gap: var(--espacamento-sm); 
-    justify-content: center;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
-/* Aumenta a fonte dos botões de ação da tabela para acompanhar */
-.button-group button {
-    padding: var(--espacamento-md); /* Aumentado */
-    font-size: 1.1rem; /* Aumentado */
-    font-weight: 600;
-    /* ... (restante do CSS de botões e ícones) ... */
+button.editar {
+  background: #4caf50;
+  color: #fff;
+}
+button.editar:hover {
+  background: #66bb6a;
 }
 
+button.deletar {
+  background: #f44336;
+  color: #fff;
+}
+button.deletar:hover {
+  background: #ef5350;
+}
+
+/* === SEM REGISTRO === */
 .sem-registro {
-    text-align: center;
-    color: var(--cor-texto-secundario);
-    padding: var(--espacamento-xl);
+  text-align: center;
+  color: #bbb;
+  font-style: italic;
 }
 
-/* ------------------------------------------------ */
-/* RESPONSIVIDADE (Mantida) */
-/* ------------------------------------------------
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .cliente-form-card,
+  .cliente-lista-card {
+    width: 100%;
+    padding: 30px 25px;
+  }
+
+  .form-cadastro {
+    grid-template-columns: 1fr;
+  }
+
+  .form-cadastro label {
+    font-size: 1.1rem;
+  }
+
+  .form-cadastro input {
+    font-size: 1.2rem;
+    padding: 12px 16px;
+  }
+
+  button.cadastrar {
+    font-size: 1.8rem;
+    padding: 20px;
+  }
+
+  .tabela-cadastro th,
+  .tabela-cadastro td {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+}
