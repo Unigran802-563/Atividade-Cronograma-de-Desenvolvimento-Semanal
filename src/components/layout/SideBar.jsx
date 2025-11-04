@@ -10,7 +10,7 @@ import {
   FaListAlt,
   FaReceipt,
 } from "react-icons/fa";
-import "./Sidebar.css";
+import "./SideBar.css";
 
 // Componente reutilizável para os itens de navegação
 const NavItem = ({ to, icon, children }) => (
