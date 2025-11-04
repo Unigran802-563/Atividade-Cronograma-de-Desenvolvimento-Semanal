@@ -1,0 +1,259 @@
+/* === ESTILO GERAL === */
+.container {
+  min-height: 100vh;
+  background-color: #121212;
+  color: #f5f5f5;
+  font-family: "Poppins", sans-serif;
+  padding: 40px 6%;
+  box-sizing: border-box;
+}
+
+/* Mensagens */
+.mensagem {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  background-color: #1b1b1b;
+  border-left: 5px solid #4caf50;
+}
+.mensagem.erro {
+  border-left-color: #f44336;
+}
+
+/* === LAYOUT GERAL === */
+.clientes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+/* === FORMULÁRIO === */
+.cliente-form-card {
+  background: #1e1e1e;
+  padding: 50px 70px;
+  border-radius: 16px;
+  box-shadow: 0 0 18px rgba(137, 87, 255, 0.25);
+  border: 1px solid rgba(137, 87, 255, 0.4);
+  transition: 0.3s ease;
+  max-width: 1200px;   /* ← aumentamos o limite */
+  width: 90%;          /* ← mais largo */
+  margin: 0 auto;
+}
+
+.cliente-form-card:hover {
+  box-shadow: 0 0 25px rgba(137, 87, 255, 0.45);
+}
+
+.cliente-form-card h2 {
+  color: #a175ff;
+  font-size: 2rem;
+  margin-bottom: 35px;
+  text-align: center;
+}
+
+/* === CAMPOS === */
+.form-cadastro {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 30px 50px;
+  justify-items: center;
+}
+
+/* Labels */
+.form-cadastro label {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #e3dfff;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 90%;
+}
+
+/* Inputs e selects */
+.form-cadastro input,
+.form-cadastro select {
+  width: 95%;
+  padding: 20px 25px;
+  border-radius: 30px;
+  border: 1px solid #444;
+  background: #111;
+  color: #fff;
+  font-size: 1.6rem;
+  display: block;
+  margin: 0 auto;
+  transition: 0.3s;
+}
+
+.form-cadastro input:focus,
+.form-cadastro select:focus {
+  outline: none;
+  border-color: #a175ff;
+  background: #292929;
+}
+
+/* === BOTÕES === */
+.botoes-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+button.cadastrar,
+button.atualizar {
+  background-color: #8e4fff;
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: bold;
+  border-radius: 20px;
+  padding: 30px 0;
+  width: 100%;
+  max-width: 450px;
+  transition: all 0.3s ease;
+}
+
+button.cadastrar:hover,
+button.atualizar:hover {
+  background-color: #a175ff;
+  transform: scale(1.03);
+}
+
+/* Botão cancelar */
+button.cancelar {
+  background-color: #555;
+  color: #fff;
+  font-size: 1.3rem;
+  padding: 14px 0;
+  border-radius: 12px;
+  width: 60%;
+  max-width: 320px;
+  margin-top: 12px;
+  transition: background 0.3s ease;
+}
+
+button.cancelar:hover {
+  background-color: #777;
+}
+
+/* === LISTA === */
+.cliente-lista-card {
+  background: #1e1e1e;
+  padding: 40px 50px;
+  border-radius: 16px;
+  box-shadow: 0 0 12px rgba(137, 87, 255, 0.25);
+  border: 1px solid rgba(137, 87, 255, 0.35);
+  max-width: 1200px;  /* ← igual ao formulário */
+  width: 90%;         /* ← mais largo */
+  margin: 0 auto;
+}
+
+.cliente-lista-card h3 {
+  color: #a175ff;
+  margin-bottom: 30px;
+  font-size: 1.7rem;
+  text-align: center;
+}
+
+/* === TABELA === */
+.tabela-cadastro {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.15rem;
+}
+
+.tabela-cadastro th,
+.tabela-cadastro td {
+  border: 1px solid #333;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.tabela-cadastro th {
+  background: #292929;
+  color: #a175ff;
+  font-weight: 600;
+}
+
+.tabela-cadastro tr:nth-child(even) {
+  background: #1a1a1a;
+}
+
+.tabela-cadastro tr:hover {
+  background: #2b2b2b;
+}
+
+/* === AÇÕES === */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+button.editar {
+  background: #4caf50;
+  color: #fff;
+}
+button.editar:hover {
+  background: #66bb6a;
+}
+
+button.deletar {
+  background: #f44336;
+  color: #fff;
+}
+button.deletar:hover {
+  background: #ef5350;
+}
+
+/* === SEM REGISTRO === */
+.sem-registro {
+  text-align: center;
+  color: #bbb;
+  font-style: italic;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .cliente-form-card,
+  .cliente-lista-card {
+    width: 100%;
+    padding: 30px 25px;
+  }
+
+  .form-cadastro {
+    grid-template-columns: 1fr;
+  }
+
+  .form-cadastro label {
+    font-size: 1.1rem;
+  }
+
+  .form-cadastro input {
+    font-size: 1.2rem;
+    padding: 12px 16px;
+  }
+
+  button.cadastrar {
+    font-size: 1.8rem;
+    padding: 20px;
+  }
+
+  .tabela-cadastro th,
+  .tabela-cadastro td {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+}
