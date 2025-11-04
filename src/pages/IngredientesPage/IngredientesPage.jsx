@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import "./style.css";
+import "./IngredientesPage.css"; // Importa o CSS final
+import { FaEdit, FaTrash, FaPlus, FaCheck } from "react-icons/fa";
 
 const IngredientesPage = () => {
   const [ingredientes, setIngredientes] = useState([]);
@@ -34,8 +35,12 @@ const IngredientesPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.id_ingrediente || !formData.nome) {
-      setMensagem("ID e Nome são obrigatórios!");
+    if (
+      !formData.id_ingrediente ||
+      !formData.nome ||
+      !formData.unidade_medida
+    ) {
+      setMensagem("Todos os campos são obrigatórios!");
       setMensagemTipo("erro");
       return;
     }
@@ -44,9 +49,8 @@ const IngredientesPage = () => {
       const idExistente = ingredientes.some(
         (ing) => ing.id_ingrediente === formData.id_ingrediente
       );
-
       if (idExistente) {
-        setMensagem("Esse ID já existe! Escolha outro ID para o ingrediente.");
+        setMensagem("Esse ID já existe! Escolha outro para o ingrediente.");
         setMensagemTipo("erro");
         return;
       }
@@ -67,18 +71,19 @@ const IngredientesPage = () => {
       const data = await res.json();
       if (res.ok) {
         setMensagem(
-          editandoId ? "Ingrediente atualizado!" : "Ingrediente criado!"
+          editandoId
+            ? "Ingrediente atualizado com sucesso!"
+            : "Ingrediente cadastrado com sucesso!"
         );
         setMensagemTipo("sucesso");
-        setFormData({ id_ingrediente: "", nome: "", unidade_medida: "" });
-        setEditandoId(null);
+        handleCancelar();
         fetchIngredientes();
       } else {
-        setMensagem(`Erro: ${data.error}`);
+        setMensagem(`Erro: ${data.error || "Ocorreu um problema."}`);
         setMensagemTipo("erro");
       }
     } catch (err) {
-      setMensagem(`Erro: ${err.message}`);
+      setMensagem(`Erro de conexão: ${err.message}`);
       setMensagemTipo("erro");
     }
   };
@@ -87,6 +92,7 @@ const IngredientesPage = () => {
     setFormData({ ...ingrediente });
     setEditandoId(ingrediente.id_ingrediente);
     setMensagem("");
+    window.scrollTo(0, 0);
   };
 
   const handleCancelar = () => {
@@ -101,117 +107,142 @@ const IngredientesPage = () => {
       const res = await fetch(`${API_URL}/ingrediente/${id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
       if (res.ok) {
-        setMensagem("Ingrediente deletado!");
+        setMensagem("Ingrediente deletado com sucesso!");
         setMensagemTipo("sucesso");
         fetchIngredientes();
       } else {
-        setMensagem(`Erro: ${data.error}`);
+        const data = await res.json();
+        setMensagem(
+          `Erro ao deletar: ${data.error || "Não foi possível deletar."}`
+        );
         setMensagemTipo("erro");
       }
     } catch (err) {
-      setMensagem(`Erro: ${err.message}`);
+      setMensagem(`Erro de conexão: ${err.message}`);
       setMensagemTipo("erro");
     }
   };
 
   return (
-    <div className="container">
-      <h2>Cadastro de Ingrediente</h2>
-      <form onSubmit={handleSubmit} className="form-cadastro">
-        <label>ID do Ingrediente</label>
-        <input
-          type="text"
-          name="id_ingrediente"
-          placeholder="Ex: I001"
-          value={formData.id_ingrediente}
-          onChange={handleChange}
-          required
-          disabled={editandoId}
-        />
-        <label>Nome</label>
-        <input
-          type="text"
-          name="nome"
-          placeholder="Ex: Tomate"
-          value={formData.nome}
-          onChange={handleChange}
-          required
-        />
-        <label>Unidade de Medida</label>
-        <select
-          name="unidade_medida"
-          value={formData.unidade_medida}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Selecione...</option>
-          <option value="kg">kg</option>
-          <option value="g">g</option>
-          <option value="l">l</option>
-          <option value="ml">ml</option>
-          <option value="un">un</option>
-        </select>
+    <div className="page-container">
+      <header className="page-header">
+        <h1>Cadastro de Ingredientes</h1>
+        <p>Gerencie os ingredientes que serão utilizados nos pratos.</p>
+      </header>
 
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            type="submit"
-            className={editandoId ? "atualizar" : "cadastrar"}
-          >
-            {editandoId ? "Atualizar" : "Cadastrar"}
-          </button>
-          {editandoId && (
-            <button type="button" onClick={handleCancelar} className="cancelar">
-              Cancelar
-            </button>
-          )}
+      {mensagem && <div className={`message ${mensagemTipo}`}>{mensagem}</div>}
+
+      <div className="main-container">
+        <div className="form-card">
+          <h2>{editandoId ? "Editar Ingrediente" : "Novo Ingrediente"}</h2>
+          <form onSubmit={handleSubmit} className="main-form">
+            <div className="form-group">
+              <label htmlFor="id_ingrediente">ID do Ingrediente *</label>
+              <input
+                type="text"
+                id="id_ingrediente"
+                name="id_ingrediente"
+                placeholder="Ex: I001, FRUT02"
+                value={formData.id_ingrediente}
+                onChange={handleChange}
+                required
+                disabled={!!editandoId}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="nome">Nome do Ingrediente *</label>
+              <input
+                type="text"
+                id="nome"
+                name="nome"
+                placeholder="Ex: Tomate Cereja"
+                value={formData.nome}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="unidade_medida">Unidade de Medida *</label>
+              <select
+                id="unidade_medida"
+                name="unidade_medida"
+                value={formData.unidade_medida}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Selecione a unidade</option>
+                <option value="kg">Quilograma (kg)</option>
+                <option value="g">Grama (g)</option>
+                <option value="l">Litro (l)</option>
+                <option value="ml">Mililitro (ml)</option>
+                <option value="un">Unidade (un)</option>
+              </select>
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="btn btn-success">
+                {editandoId ? (
+                  <>
+                    <FaCheck /> Atualizar
+                  </>
+                ) : (
+                  <>
+                    <FaPlus /> Cadastrar
+                  </>
+                )}
+              </button>
+              {editandoId && (
+                <button
+                  type="button"
+                  onClick={handleCancelar}
+                  className="btn btn-secondary"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </form>
         </div>
-      </form>
 
-      {mensagem && (
-        <p className={`mensagem ${mensagemTipo === "erro" ? "erro" : ""}`}>
-          {mensagem}
-        </p>
-      )}
-
-      <h3>Lista de Ingredientes</h3>
-      {ingredientes.length === 0 ? (
-        <p className="sem-registro">Nenhum ingrediente cadastrado ainda.</p>
-      ) : (
-        <table className="tabela-cadastro">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Unidade</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ingredientes.map((i) => (
-              <tr key={i.id_ingrediente}>
-                <td>{i.id_ingrediente}</td>
-                <td>{i.nome}</td>
-                <td>{i.unidade_medida}</td>
-                <td>
-                  <div className="button-group">
-                    <button className="editar" onClick={() => handleEditar(i)}>
-                      Editar
+        {/* === MUDANÇA PRINCIPAL AQUI: de <table> para grid de <div> === */}
+        <div className="lista-card">
+          <h2>Ingredientes Cadastrados</h2>
+          {ingredientes.length === 0 ? (
+            <p className="lista-vazia">Nenhum ingrediente cadastrado.</p>
+          ) : (
+            <div className="lista-grid">
+              {ingredientes.map((i) => (
+                <div className="item-card" key={i.id_ingrediente}>
+                  <div className="item-info">
+                    <span className="item-id">{i.id_ingrediente}</span>
+                    <h3>{i.nome}</h3>
+                    <div className="item-detalhes">
+                      <span className="item-unidade">{i.unidade_medida}</span>
+                    </div>
+                  </div>
+                  <div className="item-acoes">
+                    <button
+                      className="btn-icon btn-edit"
+                      onClick={() => handleEditar(i)}
+                      title="Editar"
+                    >
+                      <FaEdit color="#10B981" />
                     </button>
                     <button
-                      className="deletar"
+                      className="btn-icon btn-delete"
                       onClick={() => handleDeletar(i.id_ingrediente)}
+                      title="Deletar"
                     >
-                      Deletar
+                      <FaTrash color="#EF4444" />
                     </button>
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

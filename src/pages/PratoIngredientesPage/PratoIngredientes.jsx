@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
-import "./style.css";
+import "./PratoIngredientes.css";
+// 1. IMPORTAR OS ÍCONES CORRETOS (FaEdit, FaTrash)
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const PratoIngredientes = () => {
+  // ... (toda a lógica do componente permanece a mesma)
   const [pratoIngrediente, setPratoIngrediente] = useState([]);
   const [pratos, setPratos] = useState([]);
   const [ingredientes, setIngredientes] = useState([]);
@@ -29,22 +32,31 @@ const PratoIngredientes = () => {
       const data = await res.json();
       setPratoIngrediente(data);
     } catch (err) {
-      setMensagem(`Erro: ${err.message}`);
+      setMensagem(`Erro ao buscar dados: ${err.message}`);
       setMensagemTipo("erro");
     }
   };
 
   const fetchPratos = async () => {
-    const res = await fetch(`${API_URL}/pratos`);
-    setPratos(await res.json());
+    try {
+      const res = await fetch(`${API_URL}/pratos`);
+      setPratos(await res.json());
+    } catch (err) {
+      console.error("Erro ao buscar pratos:", err);
+    }
   };
 
   const fetchIngredientes = async () => {
-    const res = await fetch(`${API_URL}/ingredientes`);
-    setIngredientes(await res.json());
+    try {
+      const res = await fetch(`${API_URL}/ingredientes`);
+      setIngredientes(await res.json());
+    } catch (err) {
+      console.error("Erro ao buscar ingredientes:", err);
+    }
   };
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleAdicionarIngrediente = () => {
     const { id_ingrediente_temp, quantidade_temp } = formData;
@@ -72,14 +84,16 @@ const PratoIngredientes = () => {
       return;
     }
 
-    const ingrediente = ingredientes.find((i) => i.id_ingrediente === id_ingrediente_temp);
+    const ingrediente = ingredientes.find(
+      (i) => i.id_ingrediente === id_ingrediente_temp
+    );
 
     setIngredientesSelecionados([
       ...ingredientesSelecionados,
       {
         id_ingrediente: id_ingrediente_temp,
         nome: ingrediente ? ingrediente.nome : id_ingrediente_temp,
-        medida: ingrediente?.unidade_medida || "-", 
+        medida: ingrediente?.unidade_medida || "-",
         quantidade_utilizada: quantidadeNum,
       },
     ]);
@@ -90,7 +104,9 @@ const PratoIngredientes = () => {
 
   const handleRemoverIngrediente = (id_ingrediente) => {
     setIngredientesSelecionados(
-      ingredientesSelecionados.filter((i) => i.id_ingrediente !== id_ingrediente)
+      ingredientesSelecionados.filter(
+        (i) => i.id_ingrediente !== id_ingrediente
+      )
     );
   };
 
@@ -122,7 +138,7 @@ const PratoIngredientes = () => {
         });
       }
 
-      setMensagem("Ingredientes cadastrados com sucesso!");
+      setMensagem("Ingredientes do prato cadastrados com sucesso!");
       setMensagemTipo("sucesso");
       setFormData({
         id_prato: "",
@@ -132,7 +148,7 @@ const PratoIngredientes = () => {
       setIngredientesSelecionados([]);
       fetchPratoIngrediente();
     } catch (err) {
-      setMensagem(`Erro: ${err.message}`);
+      setMensagem(`Erro ao cadastrar: ${err.message}`);
       setMensagemTipo("erro");
     }
   };
@@ -144,12 +160,15 @@ const PratoIngredientes = () => {
       id_ingrediente_temp: pi.id_ingrediente,
       quantidade_temp: pi.quantidade_utilizada.toString().replace(".", ","),
     });
+    window.scrollTo(0, 0);
   };
 
   const handleAtualizar = async () => {
     if (!editando) return;
 
-    const quantidadeNum = parseFloat(formData.quantidade_temp.replace(",", "."));
+    const quantidadeNum = parseFloat(
+      formData.quantidade_temp.replace(",", ".")
+    );
     if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
       setMensagem("Informe uma quantidade válida maior que zero!");
       setMensagemTipo("erro");
@@ -162,7 +181,10 @@ const PratoIngredientes = () => {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...editando, quantidade_utilizada: quantidadeNum }),
+          body: JSON.stringify({
+            ...editando,
+            quantidade_utilizada: quantidadeNum,
+          }),
         }
       );
 
@@ -170,196 +192,257 @@ const PratoIngredientes = () => {
         setMensagem("Quantidade atualizada com sucesso!");
         setMensagemTipo("sucesso");
         setEditando(null);
-        setFormData({ id_prato: "", id_ingrediente_temp: "", quantidade_temp: "" });
+        setFormData({
+          id_prato: "",
+          id_ingrediente_temp: "",
+          quantidade_temp: "",
+        });
         fetchPratoIngrediente();
       } else {
         setMensagem("Erro ao atualizar ingrediente!");
         setMensagemTipo("erro");
       }
     } catch (err) {
-      setMensagem(`Erro: ${err.message}`);
+      setMensagem(`Erro ao atualizar: ${err.message}`);
       setMensagemTipo("erro");
     }
   };
 
   const handleDeletar = async (id_prato, id_ingrediente) => {
     if (!window.confirm("Deseja realmente deletar esta relação?")) return;
-    const res = await fetch(
-      `${API_URL}/prato_ingrediente/${id_prato}/${id_ingrediente}`,
-      { method: "DELETE" }
-    );
-    const data = await res.json();
-    if (res.ok) {
-      setMensagem("Relação deletada com sucesso!");
-      setMensagemTipo("sucesso");
-      fetchPratoIngrediente();
-    } else {
-      setMensagem(`Erro: ${data.error}`);
+    try {
+      const res = await fetch(
+        `${API_URL}/prato_ingrediente/${id_prato}/${id_ingrediente}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) {
+        setMensagem("Relação deletada com sucesso!");
+        setMensagemTipo("sucesso");
+        fetchPratoIngrediente();
+      } else {
+        const data = await res.json();
+        setMensagem(`Erro ao deletar: ${data.error}`);
+        setMensagemTipo("erro");
+      }
+    } catch (err) {
+      setMensagem(`Erro ao deletar: ${err.message}`);
       setMensagemTipo("erro");
     }
   };
 
-  const getNomePrato = (id) => pratos.find((p) => p.id_prato === id)?.nome || id;
+  const getNomePrato = (id) =>
+    pratos.find((p) => p.id_prato === id)?.nome || id;
   const getNomeIngrediente = (id) =>
     ingredientes.find((i) => i.id_ingrediente === id)?.nome || id;
   const getMedidaIngrediente = (id) =>
     ingredientes.find((i) => i.id_ingrediente === id)?.unidade_medida || "-";
 
   return (
-    <div className="container">
-      <h2>Definir Ingredientes do Prato</h2>
+    <div className="page-container">
+      <header className="page-header">
+        <h1>Ingredientes por Prato</h1>
+        <p>Associe ingredientes e suas quantidades a cada prato do cardápio.</p>
+      </header>
 
-      <form onSubmit={handleSubmit} className="form-cadastro">
-        <label htmlFor="id_prato">Selecione o prato:</label>
-        <select
-          id="id_prato"
-          name="id_prato"
-          value={formData.id_prato}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Selecione o prato...</option>
-          {pratos.map((p) => (
-            <option key={p.id_prato} value={p.id_prato}>
-              {p.nome}
-            </option>
-          ))}
-        </select>
+      {mensagem && <div className={`message ${mensagemTipo}`}>{mensagem}</div>}
 
-        <div className="ingrediente-adicao">
-          <h4>{editando ? "Editar Ingrediente" : "Adicionar Ingrediente"}</h4>
-
-          <label htmlFor="id_ingrediente_temp">Ingrediente:</label>
-          <select
-            id="id_ingrediente_temp"
-            name="id_ingrediente_temp"
-            value={formData.id_ingrediente_temp}
-            onChange={handleChange}
-            disabled={!!editando}
-            required
-          >
-            <option value="">Selecione o ingrediente...</option>
-            {ingredientes.map((i) => (
-              <option key={i.id_ingrediente} value={i.id_ingrediente}>
-                {i.nome}
-              </option>
-            ))}
-          </select>
-
-          {formData.id_ingrediente_temp && (
-            <p className="medida-info">
-              Medida: {getMedidaIngrediente(formData.id_ingrediente_temp)}
-            </p>
-          )}
-
-          <label htmlFor="quantidade_temp">Quantidade:</label>
-          <input
-            type="text"
-            id="quantidade_temp"
-            name="quantidade_temp"
-            value={formData.quantidade_temp}
-            onChange={handleChange}
-            placeholder="Ex: 200, 1.5, 0.5..."
-            required
-          />
-
-          <div className="botoes-centrais">
-            {editando ? (
-              <>
-                <button type="button" className="atualizar" onClick={handleAtualizar}>
-                  Atualizar
-                </button>
-                <button
-                  type="button"
-                  className="cancelar"
-                  onClick={() => {
-                    setEditando(null);
-                    setFormData({ id_prato: "", id_ingrediente_temp: "", quantidade_temp: "" });
-                  }}
-                >
-                  Cancelar
-                </button>
-              </>
-            ) : (
-              <button type="button" className="adicionar" onClick={handleAdicionarIngrediente}>
-                Adicionar Ingrediente
-              </button>
-            )}
-          </div>
-        </div>
-
-        {ingredientesSelecionados.length > 0 && (
-          <>
-            <h4>Ingredientes Adicionados</h4>
-            <table className="tabela-cadastro">
-              <thead>
-                <tr>
-                  <th>Ingrediente</th>
-                  <th>Medida</th>
-                  <th>Quantidade</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ingredientesSelecionados.map((i) => (
-                  <tr key={i.id_ingrediente}>
-                    <td>{i.nome}</td>
-                    <td>{i.medida}</td>
-                    <td>{i.quantidade_utilizada}</td>
-                    <td className="button-group">
-                      <button type="button" className="editar" onClick={() => handleEditar(i)}>
-                        Editar
-                      </button>
-                      <button type="button" className="deletar" onClick={() => handleRemoverIngrediente(i.id_ingrediente)}>
-                        Deletar
-                      </button>
-                    </td>
-                  </tr>
+      <div className="main-container">
+        <div className="form-card">
+          {/* ... O formulário continua o mesmo ... */}
+          <h2>
+            {editando
+              ? "Editar Ingrediente"
+              : "Adicionar Ingredientes ao Prato"}
+          </h2>
+          <form onSubmit={handleSubmit} className="main-form">
+            <div className="form-group">
+              <label htmlFor="id_prato">Prato</label>
+              <select
+                id="id_prato"
+                name="id_prato"
+                value={formData.id_prato}
+                onChange={handleChange}
+                disabled={!!editando || ingredientesSelecionados.length > 0}
+                required
+              >
+                <option value="">Selecione um prato</option>
+                {pratos.map((p) => (
+                  <option key={p.id_prato} value={p.id_prato}>
+                    {p.nome}
+                  </option>
                 ))}
-              </tbody>
-            </table>
-          </>
-        )}
+              </select>
+            </div>
 
-        <div className="botoes-centrais">
-          <button type="submit" className="cadastrar">
-            Cadastrar Ingredientes
-          </button>
+            <div className="add-ingredient-section">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="id_ingrediente_temp">Ingrediente</label>
+                  <select
+                    id="id_ingrediente_temp"
+                    name="id_ingrediente_temp"
+                    value={formData.id_ingrediente_temp}
+                    onChange={handleChange}
+                    disabled={!!editando}
+                  >
+                    <option value="">Selecione</option>
+                    {ingredientes.map((i) => (
+                      <option key={i.id_ingrediente} value={i.id_ingrediente}>
+                        {i.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="quantidade_temp">
+                    Quantidade (
+                    {getMedidaIngrediente(formData.id_ingrediente_temp)})
+                  </label>
+                  <input
+                    type="text"
+                    id="quantidade_temp"
+                    name="quantidade_temp"
+                    value={formData.quantidade_temp}
+                    onChange={handleChange}
+                    placeholder="Ex: 200, 1.5"
+                  />
+                </div>
+              </div>
+              <div className="form-actions">
+                {editando ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-update"
+                      onClick={handleAtualizar}
+                    >
+                      Atualizar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setEditando(null);
+                        setFormData({
+                          ...formData,
+                          id_ingrediente_temp: "",
+                          quantidade_temp: "",
+                        });
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-add"
+                    onClick={handleAdicionarIngrediente}
+                  >
+                    Adicionar à Lista
+                  </button>
+                )}
+              </div>
+            </div>
+            {ingredientesSelecionados.length > 0 && (
+              <div className="selected-items-list">
+                <h3>Ingredientes a serem salvos</h3>
+                {/* 1. APLICAR O NOVO CLASSNAME */}
+                <table className="tabela-temporaria">
+                  <thead>
+                    <tr>
+                      <th>Ingrediente</th>
+                      <th>Quantidade</th>
+                      <th className="acao-header">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ingredientesSelecionados.map((i) => (
+                      <tr key={i.id_ingrediente}>
+                        <td>{i.nome}</td>
+                        <td>{`${i.quantidade_utilizada} ${i.medida}`}</td>
+                        <td className="actions-cell">
+                          <button
+                            type="button"
+                            className="btn-icon btn-delete"
+                            title="Remover Ingrediente"
+                            onClick={() =>
+                              handleRemoverIngrediente(i.id_ingrediente)
+                            }
+                          >
+                            <FaTrash color="#EF4444" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className="form-actions">
+              <button
+                type="submit"
+                className="btn btn-success"
+                disabled={ingredientesSelecionados.length === 0}
+              >
+                Salvar Ingredientes no Prato
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
 
-      {mensagem && <p className={`mensagem ${mensagemTipo === "erro" ? "erro" : ""}`}>{mensagem}</p>}
-
-      <h3>Ingredientes Cadastrados nos Pratos</h3>
-      {pratoIngrediente.length === 0 ? (
-        <p className="sem-registro">Nenhuma relação cadastrada.</p>
-      ) : (
-        <table className="tabela-cadastro">
-          <thead>
-            <tr>
-              <th>Prato</th>
-              <th>Ingrediente</th>
-              <th>Medida</th>
-              <th>Quantidade</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pratoIngrediente.map((pi) => (
-              <tr key={`${pi.id_prato}-${pi.id_ingrediente}`}>
-                <td>{getNomePrato(pi.id_prato)}</td>
-                <td>{getNomeIngrediente(pi.id_ingrediente)}</td>
-                <td>{getMedidaIngrediente(pi.id_ingrediente)}</td>
-                <td>{pi.quantidade_utilizada.toString().replace(".", ",")}</td>
-                <td className="button-group">
-                  <button className="editar" onClick={() => handleEditar(pi)}>Editar</button>
-                  <button className="deletar" onClick={() => handleDeletar(pi.id_prato, pi.id_ingrediente)}>Deletar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        <div className="lista-card">
+          <h2>Relações Cadastradas</h2>
+          {pratoIngrediente.length === 0 ? (
+            <p className="lista-vazia">Nenhuma relação cadastrada.</p>
+          ) : (
+            <div className="lista-grid">
+              {pratoIngrediente.map((pi) => (
+                <div
+                  className="item-card"
+                  key={`${pi.id_prato}-${pi.id_ingrediente}`}
+                >
+                  <div className="item-info">
+                    <span className="item-categoria">
+                      {getNomePrato(pi.id_prato)}
+                    </span>
+                    <h3>{getNomeIngrediente(pi.id_ingrediente)}</h3>
+                    <div className="item-detalhes">
+                      <span className="item-quantidade">
+                        {`${pi.quantidade_utilizada
+                          .toString()
+                          .replace(".", ",")} ${getMedidaIngrediente(
+                          pi.id_ingrediente
+                        )}`}
+                      </span>
+                    </div>
+                  </div>
+                  {/* 2. USAR OS ÍCONES CORRETOS COM A PROP 'color' */}
+                  <div className="item-acoes">
+                    <button
+                      className="btn-icon btn-edit"
+                      onClick={() => handleEditar(pi)}
+                      title="Editar"
+                    >
+                      <FaEdit color="#10B981" />
+                    </button>
+                    <button
+                      className="btn-icon btn-delete"
+                      onClick={() =>
+                        handleDeletar(pi.id_prato, pi.id_ingrediente)
+                      }
+                      title="Deletar"
+                    >
+                      <FaTrash color="#EF4444" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

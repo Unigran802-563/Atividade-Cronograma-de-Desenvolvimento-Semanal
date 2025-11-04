@@ -1,3 +1,24 @@
+/* ========================================
+   ARQUIVO: Sidebar.css (Versão Final Larga)
+   ======================================== */
+
+:root {
+  --sidebar-width: 280px; /* Largura aumentada para acomodar os textos */
+  --cor-roxo: #A78BFA;
+  --cor-roxo-escuro: #8B5CF6;
+  --cor-verde: #34D399;
+  --cor-preto-claro: #1F2937;
+  --cor-cinza-escuro: #374151;
+  --cor-texto-principal: #F3F4F6;
+  --cor-texto-secundario: #9CA3AF;
+  --cor-texto-desabilitado: #6B7280;
+  --espacamento-xs: 0.5rem;
+  --espacamento-sm: 0.75rem;
+  --espacamento-md: 1rem;
+  --espacamento-lg: 1.5rem;
+  --transition-fast: all 0.2s ease-in-out;
+}
+
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
@@ -8,27 +29,31 @@
   position: fixed;
   left: 0;
   top: 0;
-  overflow-y: auto;
+  z-index: 1000;
+  transition: width 0.2s ease; /* Adiciona uma transição suave se a largura mudar */
 }
 
 /* Header da Sidebar */
 .sidebar-header {
-  padding: var(--espacamento-lg) var(--espacamento-md);
+  padding: var(--espacamento-lg);
   background: linear-gradient(135deg, var(--cor-roxo) 0%, var(--cor-roxo-escuro) 100%);
   border-bottom: 2px solid var(--cor-verde);
+  text-align: left;
+  flex-shrink: 0;
 }
 
 .sidebar-title {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--cor-texto-principal);
-  margin-bottom: var(--espacamento-xs);
+  margin: 0;
 }
 
 .sidebar-subtitle {
   font-size: 0.85rem;
-  color: var(--cor-texto-secundario);
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 300;
+  margin: var(--espacamento-xs) 0 0;
 }
 
 /* Navegação */
@@ -38,50 +63,69 @@
   display: flex;
   flex-direction: column;
   gap: var(--espacamento-xs);
+  overflow-y: auto;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: var(--espacamento-sm);
-  padding: var(--espacamento-md) var(--espacamento-lg);
+  gap: var(--espacamento-md);
+  padding: var(--espacamento-sm) var(--espacamento-lg);
+  margin: 0 var(--espacamento-md);
   color: var(--cor-texto-secundario);
   text-decoration: none;
   transition: var(--transition-fast);
-  border-left: 3px solid transparent;
+  border-left: 4px solid transparent;
+  border-radius: 8px;
   font-weight: 500;
+  min-height: 48px;
 }
 
 .nav-item:hover {
   background-color: var(--cor-cinza-escuro);
   color: var(--cor-texto-principal);
-  border-left-color: var(--cor-verde);
 }
 
 .nav-item.active {
   background-color: var(--cor-cinza-escuro);
   color: var(--cor-verde);
   border-left-color: var(--cor-verde);
+  font-weight: 600;
 }
 
 .nav-icon {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.nav-item.active .nav-icon {
+  text-shadow: 0 0 8px var(--cor-verde);
 }
 
 .nav-text {
-  font-size: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  white-space: nowrap; /* Garante que o texto não quebre */
 }
 
 /* Footer da Sidebar */
 .sidebar-footer {
-  padding: var(--espacamento-md);
+  padding: var(--espacamento-lg);
   border-top: 1px solid var(--cor-cinza-escuro);
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--cor-texto-desabilitado);
+  flex-shrink: 0;
 }
 
+/* Responsividade */
+@media (max-width: 768px) {
+  /* Em telas de celular, a sidebar pode se tornar uma gaveta ou ser mais fina */
+  .sidebar {
+    width: 240px; /* Reduz um pouco em telas menores */
+  }
+}

@@ -1,0 +1,153 @@
+/* ===================================================================
+   ARQUIVO: PratoIngredientes.css
+   ESTILO: Finalizado, com ícones corretos
+   =================================================================== */
+
+/* ... (variáveis e estilos gerais permanecem os mesmos) ... */
+:root {
+  --cor-roxo: #A78BFA;
+  --cor-verde: #34D399;
+  --cor-verde-escuro: #059669;
+  --cor-erro: #EF4444;
+  --cor-aviso: #F59E0B;
+  --cor-preto-claro: #1F2937;
+  --cor-cinza-escuro: #374151;
+  --cor-texto-principal: #F3F4F6;
+  --cor-texto-secundario: #9CA3AF;
+  --cor-texto-desabilitado: #6B7280;
+
+  --espacamento-xs: 0.5rem;
+  --espacamento-sm: 0.75rem;
+  --espacamento-md: 1rem;
+  --espacamento-lg: 1.5rem;
+  --espacamento-xl: 2rem;
+
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --transition-fast: all 0.2s ease-in-out;
+}
+
+.page-container { padding: var(--espacamento-lg); min-height: 100vh; }
+.page-header { margin-bottom: var(--espacamento-xl); }
+.page-header h1 { color: var(--cor-roxo); font-size: 2.5rem; margin-bottom: var(--espacamento-xs); font-weight: 700; }
+.page-header p { color: var(--cor-texto-secundario); font-size: 1.1rem; }
+.main-container { display: grid; grid-template-columns: 1fr; gap: var(--espacamento-xl); }
+.form-card, .lista-card { background-color: var(--cor-preto-claro); border: 2px solid var(--cor-roxo); border-radius: var(--border-radius-lg); padding: var(--espacamento-lg); }
+.form-card h2, .lista-card h2 { color: var(--cor-roxo); font-size: 1.5rem; margin-top: 0; margin-bottom: var(--espacamento-md); font-weight: 600; }
+.main-form { display: flex; flex-direction: column; gap: var(--espacamento-lg); }
+.form-group { display: flex; flex-direction: column; gap: var(--espacamento-xs); }
+.form-group label { color: var(--cor-texto-principal); font-weight: 500; }
+.form-group input, .form-group select { background-color: var(--cor-cinza-escuro); border: 2px solid transparent; border-radius: var(--border-radius-md); padding: var(--espacamento-sm); color: var(--cor-texto-principal); font-size: 1rem; transition: var(--transition-fast); }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--cor-roxo); }
+.form-group select[disabled] { background-color: #4b5563; cursor: not-allowed; color: var(--cor-texto-desabilitado); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacamento-md); }
+.add-ingredient-section { border: 2px dashed var(--cor-cinza-escuro); border-radius: var(--border-radius-md); padding: var(--espacamento-md); display: flex; flex-direction: column; gap: var(--espacamento-md); }
+.form-actions { display: flex; gap: var(--espacamento-sm); margin-top: var(--espacamento-sm); justify-content: center; }
+.btn { padding: var(--espacamento-sm) var(--espacamento-lg); border: none; border-radius: var(--border-radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition-fast); text-align: center; }
+.btn:disabled { background-color: var(--cor-texto-desabilitado); cursor: not-allowed; transform: none; }
+.btn-success { background-color: var(--cor-verde); color: white; flex: 1; }
+.btn-success:hover:not(:disabled) { background-color: var(--cor-verde-escuro); transform: translateY(-2px); }
+.btn-secondary { background-color: var(--cor-cinza-escuro); color: var(--cor-texto-principal); }
+.btn-secondary:hover { background-color: #4b5563; }
+.btn-add { background-color: var(--cor-roxo); color: white; flex: 1; }
+.btn-add:hover { background-color: #8B5CF6; }
+.btn-update { background-color: var(--cor-aviso); color: white; flex: 1; }
+.btn-update:hover { background-color: #D97706; }
+.selected-items-list { margin-top: var(--espacamento-md); }
+.selected-items-list h3 { font-size: 1.1rem; color: var(--cor-texto-secundario); margin-bottom: var(--espacamento-sm); }
+.table-wrapper { overflow-x: auto; }
+.styled-table { width: 100%; border-collapse: collapse; color: var(--cor-texto-principal); }
+.styled-table th, .styled-table td { padding: var(--espacamento-sm) var(--espacamento-md); text-align: left; border-bottom: 1px solid var(--cor-cinza-escuro); }
+.styled-table th { background-color: #2a3647; font-weight: 600; color: var(--cor-texto-secundario); text-transform: uppercase; font-size: 0.85rem; }
+.styled-table tbody tr:hover { background-color: #2a3647; }
+.actions-cell { display: flex; gap: var(--espacamento-sm); align-items: center; }
+.message { padding: var(--espacamento-sm) var(--espacamento-lg); border-radius: var(--border-radius-md); text-align: center; font-weight: 500; color: white; margin-bottom: var(--espacamento-lg); }
+.message.sucesso { background-color: var(--cor-verde-escuro); }
+.message.erro { background-color: var(--cor-erro); }
+.lista-vazia { text-align: center; color: var(--cor-texto-desabilitado); padding: var(--espacamento-xl); font-style: italic; grid-column: 1 / -1; }
+.lista-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--espacamento-md); }
+.item-card { background-color: var(--cor-cinza-escuro); border: 2px solid transparent; border-radius: var(--border-radius-md); padding: var(--espacamento-md); display: flex; flex-direction: column; justify-content: space-between; transition: var(--transition-fast); }
+.item-card:hover { border-color: var(--cor-roxo); transform: translateY(-5px); }
+.item-info { flex: 1; margin-bottom: var(--espacamento-md); }
+.item-info h3 { color: var(--cor-texto-principal); font-size: 1.2rem; margin: 0.5rem 0; }
+.item-categoria { background-color: var(--cor-roxo); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-block; }
+.item-detalhes { margin-top: var(--espacamento-sm); }
+.item-quantidade { color: var(--cor-verde); font-weight: bold; font-size: 1.1rem; }
+.item-acoes { display: flex; gap: var(--espacamento-xs); width: 100%; justify-content: flex-end; padding-top: var(--espacamento-sm); border-top: 1px solid var(--cor-preto-claro); }
+
+/* 3. ESTILO FINAL PARA OS BOTÕES DE ÍCONE */
+.btn-icon {
+  background-color: transparent;
+  border: none; /* Sem borda */
+  padding: var(--espacamento-xs);
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  transition: var(--transition-fast);
+  line-height: 1;
+}
+
+/* Efeito de hover sutil para não interferir com a cor do ícone */
+.btn-icon:hover {
+  transform: scale(1.1); /* Aumenta um pouco o tamanho */
+  background-color: rgba(255, 255, 255, 0.1); /* Adiciona um leve brilho */
+}
+.selected-items-list {
+  margin-top: var(--espacamento-lg);
+  padding-top: var(--espacamento-lg);
+  border-top: 2px dashed var(--cor-cinza-escuro);
+}
+
+.selected-items-list h3 {
+  font-size: 1.1rem;
+  color: var(--cor-texto-secundario);
+  margin-bottom: var(--espacamento-md);
+  margin-top: 0;
+}
+
+/* Estilo da nova tabela temporária */
+.tabela-temporaria {
+  width: 100%;
+  border-collapse: separate; /* Essencial para usar border-spacing */
+  border-spacing: 0 var(--espacamento-sm); /* Espaçamento vertical entre as linhas */
+}
+
+/* Esconde o cabeçalho da tabela visualmente, mas o mantém para acessibilidade */
+.tabela-temporaria thead {
+  display: none;
+}
+
+.tabela-temporaria tbody tr {
+  background-color: var(--cor-cinza-escuro);
+  border-radius: var(--border-radius-md);
+  transition: var(--transition-fast);
+  /* Adiciona uma borda sutil para destaque */
+  border-left: 4px solid var(--cor-roxo); 
+}
+
+.tabela-temporaria tbody tr:hover {
+  background-color: #4b5563;
+}
+
+.tabela-temporaria td {
+  padding: var(--espacamento-sm) var(--espacamento-md);
+  vertical-align: middle;
+  color: var(--cor-texto-principal);
+}
+
+/* Arredonda as células da primeira e última coluna */
+.tabela-temporaria td:first-child {
+  border-top-left-radius: var(--border-radius-md);
+  border-bottom-left-radius: var(--border-radius-md);
+  font-weight: 600;
+}
+
+.tabela-temporaria td:last-child {
+  border-top-right-radius: var(--border-radius-md);
+  border-bottom-right-radius: var(--border-radius-md);
+  text-align: right;
+}
+
+.tabela-temporaria .actions-cell {
+  width: 50px; /* Define uma largura fixa para a célula de ação */
+}

@@ -24,6 +24,7 @@ function PratoPage() {
     try {
       const response = await fetch("http://localhost:3001/pratos");
       const data = await response.json();
+      console.log("Pratos carregados:", data); // Debug
       setPratos(data);
     } catch (error) {
       console.error("Erro ao carregar pratos:", error);
@@ -69,23 +70,43 @@ function PratoPage() {
 
     try {
       if (editando) {
-        await fetch(`http://localhost:3001/pratos/${pratoEditId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pratoData),
-        });
+        const response = await fetch(
+          `http://localhost:3001/pratos/${pratoEditId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(pratoData),
+          }
+        );
+
+        if (response.ok) {
+          alert("Prato atualizado com sucesso!");
+        } else {
+          const errorData = await response.json();
+          console.error("Erro ao atualizar:", errorData);
+          alert("Erro ao atualizar prato!");
+        }
       } else {
-        await fetch("http://localhost:3001/pratos", {
+        const response = await fetch("http://localhost:3001/pratos", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(pratoData),
         });
+
+        if (response.ok) {
+          alert("Prato cadastrado com sucesso!");
+        } else {
+          const errorData = await response.json();
+          console.error("Erro ao cadastrar:", errorData);
+          alert("Erro ao cadastrar prato!");
+        }
       }
 
       limparFormulario();
       carregarPratos();
     } catch (error) {
       console.error("Erro ao salvar prato:", error);
+      alert("Erro ao salvar prato!");
     }
   };
 
@@ -93,30 +114,53 @@ function PratoPage() {
     setFormData({
       id_prato: prato.id_prato,
       nome: prato.nome,
-      descricao: prato.descricao,
+      descricao: prato.descricao || "",
       preco: (prato.preco / 100).toFixed(2),
       categoria: prato.categoria,
-      disponivel: prato.disponivel,
+      disponivel: prato.disponivel !== undefined ? prato.disponivel : true,
     });
     setEditando(true);
     setPratoEditId(prato.id_prato);
   };
 
-  const handleDeletar = async (id) => {
-    if (window.confirm("Tem certeza que deseja deletar este prato?")) {
+  const handleDeletar = async (prato) => {
+    if (!prato || !prato.id_prato) {
+      console.error(
+        "Erro: ID do prato é nulo ou indefinido. Não é possível deletar."
+      );
+      return;
+    }
+    if (
+      window.confirm(`Tem certeza que deseja deletar o prato "${prato.nome}"?`)
+    ) {
       try {
-        await fetch(`http://localhost:3001/pratos/${id}`, {
-          method: "DELETE",
-        });
-        carregarPratos();
+        console.log("Deletando prato ID:", prato.id_prato); // Debug
+
+        const response = await fetch(
+          `http://localhost:3001/pratos/${prato.id_prato}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          alert("Prato deletado com sucesso!");
+          carregarPratos();
+        } else {
+          const errorData = await response.json();
+          console.error("Erro ao deletar:", errorData);
+          alert("Erro ao deletar prato! Verifique o console.");
+        }
       } catch (error) {
         console.error("Erro ao deletar prato:", error);
+        alert("Erro ao deletar prato! Verifique o console.");
       }
     }
   };
 
   const limparFormulario = () => {
     setFormData({
+      id_prato: "",
       nome: "",
       descricao: "",
       preco: "",
@@ -125,6 +169,15 @@ function PratoPage() {
     });
     setEditando(false);
     setPratoEditId(null);
+  };
+
+  const formatarCategoria = (categoria) => {
+    const categorias = {
+      entrada: "Entrada",
+      prato_principal: "Prato Principal",
+      sobremesa: "Sobremesa",
+    };
+    return categorias[categoria] || categoria;
   };
 
   return (
@@ -148,7 +201,7 @@ function PratoPage() {
                 onChange={handleChange}
                 placeholder="Ex: PR001"
                 required
-                disabled={editando} // impede mudar ID durante edição
+                disabled={editando}
               />
             </div>
 
@@ -254,7 +307,10 @@ function PratoPage() {
               <p className="lista-vazia">Nenhum prato cadastrado ainda.</p>
             ) : (
               pratos.map((prato) => (
-                <div key={prato.id_prato} className="prato-item">
+                <div
+                  key={prato.id_prato || `prato-${prato.nome}`}
+                  className="prato-item"
+                >
                   <div className="prato-info">
                     <h3>{prato.nome}</h3>
                     <p className="prato-descricao">{prato.descricao}</p>
@@ -262,7 +318,9 @@ function PratoPage() {
                       <span className="prato-preco">
                         R$ {(prato.preco / 100).toFixed(2)}
                       </span>
-                      <span className="prato-categoria">{prato.categoria}</span>
+                      <span className="prato-categoria">
+                        {formatarCategoria(prato.categoria)}
+                      </span>
                       <span
                         className={`prato-status ${
                           prato.disponivel ? "disponivel" : "indisponivel"
@@ -290,7 +348,7 @@ function PratoPage() {
                     </button>
                     <button
                       className="btn-deletar"
-                      onClick={() => handleDeletar(prato.id_prato)}
+                      onClick={() => handleDeletar(prato)}
                       title="Deletar"
                     >
                       <FaTrash color="#EF4444" />
