@@ -1,55 +1,106 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  FaUtensils,
+  FaCarrot,
+  FaUsers,
+  FaClipboardList,
+  FaSpinner,
+} from "react-icons/fa"; // 1. Importar ícones
 import "./HomePage.css";
 
-function HomePage() {
-  // 1. Criar um estado para armazenar a quantidade de pratos
-  const [totalPratos, setTotalPratos] = useState(0);
+// Um array para configurar os cards e as rotas da API
+const cardConfig = [
+  {
+    id: "pratos",
+    title: "Pratos Cadastrados",
+    icon: <FaUtensils />,
+    endpoint: "/pratos",
+  },
+  {
+    id: "ingredientes",
+    title: "Ingredientes",
+    icon: <FaCarrot />,
+    endpoint: "/ingredientes",
+  },
+  {
+    id: "clientes",
+    title: "Clientes",
+    icon: <FaUsers />,
+    endpoint: "/clientes",
+  },
+  {
+    id: "pedidos",
+    title: "Pedidos Registrados",
+    icon: <FaClipboardList />,
+    endpoint: "/pedidos",
+  },
+];
 
-  // 2. Usar o useEffect para buscar os dados quando o componente for montado
+function HomePage() {
+  // 2. Estado único para armazenar todos os totais e o estado de carregamento
+  const [dashboardData, setDashboardData] = useState({
+    pratos: 0,
+    ingredientes: 0,
+    clientes: 0,
+    pedidos: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    // Função assíncrona para buscar os pratos da API
-    const carregarTotalPratos = async () => {
+    // Função para buscar todos os dados em paralelo
+    const carregarDashboard = async () => {
       try {
-        const response = await fetch("http://localhost:3001/pratos");
-        const data = await response.json();
-        // Atualiza o estado com o número de itens no array recebido
-        setTotalPratos(data.length);
+        // Cria um array de promessas de fetch para cada endpoint
+        const promises = cardConfig.map((card) =>
+          fetch(`http://localhost:3001${card.endpoint}`).then((res) =>
+            res.json()
+          )
+        );
+
+        // Executa todas as promessas em paralelo
+        const results = await Promise.all(promises);
+
+        // Cria um novo objeto com os totais
+        const novosTotais = {
+          pratos: results[0].length,
+          ingredientes: results[1].length,
+          clientes: results[2].length,
+          pedidos: results[3].length,
+        };
+
+        setDashboardData(novosTotais);
       } catch (error) {
-        console.error("Erro ao carregar o total de pratos:", error);
-        // Se der erro, podemos manter como 0 ou exibir uma mensagem
+        console.error("Erro ao carregar dados do dashboard:", error);
+        // Em caso de erro, você pode definir um estado de erro aqui se quiser
+      } finally {
+        // 3. Independentemente de sucesso ou erro, para de carregar
+        setLoading(false);
       }
     };
 
-    carregarTotalPratos();
+    carregarDashboard();
   }, []); // O array vazio [] garante que isso rode apenas uma vez
 
   return (
     <div className="home-page">
-      <h1>Bem-vindo ao SOS Restaurante</h1>
-      <p>Sistema de Gerenciamento Completo</p>
+      <header className="page-header">
+        <h1>Bem-vindo ao SOS Restaurante</h1>
+        <p>Seu painel de gerenciamento rápido.</p>
+      </header>
 
       <div className="dashboard-cards">
-        <div className="card">
-          <h3>Pratos Cadastrados</h3>
-          {/* 3. Exibir o valor do estado em vez do número fixo "0" */}
-          <p className="card-number">{totalPratos}</p>
-        </div>
-        <div className="card">
-          <h3>Ingredientes</h3>
-          <p className="card-number">0</p>
-        </div>
-        <div className="card">
-          <h3>Clientes</h3>
-          <p className="card-number">0</p>
-        </div>
-        <div className="card">
-          <h3>Endereços</h3>
-          <p className="card-number">0</p>
-        </div>
-        <div className="card">
-          <h3>Pedidos</h3>
-          <p className="card-number">0</p>
-        </div>
+        {cardConfig.map((card) => (
+          <div className="card" key={card.id}>
+            <div className="card-icon">{card.icon}</div>
+            <h3>{card.title}</h3>
+            {/* 4. Exibe o spinner enquanto carrega, depois o número */}
+            {loading ? (
+              <FaSpinner className="spinner" />
+            ) : (
+              <p className="card-number">{dashboardData[card.id]}</p>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

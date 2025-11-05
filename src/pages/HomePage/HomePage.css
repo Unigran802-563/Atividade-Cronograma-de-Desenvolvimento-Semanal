@@ -1,23 +1,46 @@
+/* ===================================================================
+   ARQUIVO: HomePage.css
+   =================================================================== */
+
+/* ... (Copie as variáveis de :root do CSS de outra página, se não for global) ... */
+:root {
+  --cor-roxo: #A78BFA;
+  --cor-verde: #34D399;
+  --cor-preto-claro: #1F2937;
+  --cor-texto-principal: #F3F4F6;
+  --cor-texto-secundario: #9CA3AF;
+  --espacamento-sm: 0.75rem;
+  --espacamento-md: 1rem;
+  --espacamento-lg: 1.5rem;
+  --espacamento-xl: 2rem;
+  --border-radius-lg: 12px;
+  --transition-fast: all 0.2s ease-in-out;
+}
+
 .home-page {
   padding: var(--espacamento-lg);
 }
 
-.home-page h1 {
+.page-header {
+  margin-bottom: var(--espacamento-xl);
+}
+
+.page-header h1 {
   color: var(--cor-roxo);
   font-size: 2.5rem;
   margin-bottom: var(--espacamento-sm);
+  font-weight: 700;
 }
 
-.home-page p {
+.page-header p {
   color: var(--cor-texto-secundario);
   font-size: 1.2rem;
-  margin-bottom: var(--espacamento-xl);
 }
 
 .dashboard-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--espacamento-md);
+  gap: var(--espacamento-xl);
 }
 
 .card {
@@ -26,23 +49,57 @@
   border-radius: var(--border-radius-lg);
   padding: var(--espacamento-lg);
   text-align: center;
-  transition: var(--transition-normal);
+  transition: var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
   border-color: var(--cor-verde);
+}
+
+/* NOVO: Estilo para o ícone do card */
+.card-icon {
+  font-size: 2.5rem;
+  color: var(--cor-roxo);
+  margin-bottom: var(--espacamento-md);
+  transition: var(--transition-fast);
+}
+
+.card:hover .card-icon {
+  color: var(--cor-verde);
 }
 
 .card h3 {
   color: var(--cor-texto-principal);
   font-size: 1.2rem;
+  margin-top: 0;
   margin-bottom: var(--espacamento-sm);
+  font-weight: 600;
 }
 
 .card-number {
   color: var(--cor-verde);
   font-size: 3rem;
   font-weight: bold;
+  margin: 0;
+}
+
+/* NOVO: Animação para o spinner de carregamento */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  font-size: 3rem;
+  color: var(--cor-texto-secundario);
+  animation: spin 1.5s linear infinite;
 }

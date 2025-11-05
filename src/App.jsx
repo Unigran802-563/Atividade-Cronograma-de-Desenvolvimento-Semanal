@@ -9,6 +9,7 @@ import EstoquesPage from "./pages/EstoquesPage/EstoquesPage";
 import IngredientesPage from "./pages/IngredientesPage/IngredientesPage";
 import PedidosPage from "./pages/PedidosPage/PedidosPage";
 import ItemPedidosPage from "./pages/ItemPedidosPage/ItemPedidosPage";
+import PagamentosPage from "./pages/PagamentosPage/PagamentosPage";
 import "./App.css";
 
 function App() {
@@ -25,6 +26,11 @@ function App() {
           <Route path="estoques" element={<EstoquesPage />} />
           <Route path="pedidos" element={<PedidosPage />} />
           <Route path="itens-pedido" element={<ItemPedidosPage />} />
+          <Route path="itens-pedido/:idPedido" element={<ItemPedidosPage />} />
+          <Route
+            path="pagamento/:idPedido/:valorTotal"
+            element={<PagamentosPage />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

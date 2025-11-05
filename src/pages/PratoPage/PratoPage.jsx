@@ -263,17 +263,7 @@ function PratoPage() {
               </div>
             </div>
 
-            <div className="form-group checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  name="disponivel"
-                  checked={formData.disponivel}
-                  onChange={handleChange}
-                />
-                <span>Disponível para venda</span>
-              </label>
-            </div>
+            <div className="form-group checkbox-group"></div>
 
             <div className="form-actions">
               <button type="submit" className="btn btn-success">
@@ -320,21 +310,6 @@ function PratoPage() {
                       </span>
                       <span className="prato-categoria">
                         {formatarCategoria(prato.categoria)}
-                      </span>
-                      <span
-                        className={`prato-status ${
-                          prato.disponivel ? "disponivel" : "indisponivel"
-                        }`}
-                      >
-                        {prato.disponivel ? (
-                          <>
-                            <BsCheckCircleFill /> Disponível
-                          </>
-                        ) : (
-                          <>
-                            <BsXCircleFill /> Indisponível
-                          </>
-                        )}
                       </span>
                     </div>
                   </div>

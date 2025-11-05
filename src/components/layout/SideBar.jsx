@@ -64,6 +64,12 @@ function Sidebar() {
 
       <div className="sidebar-footer">
         <p>© 2025 SOS Restaurante</p>
+        <h3>Equipe:</h3>
+        <ul>
+          <li>Flávia Teruya de Oliveira</li>
+          <li>João Gustavo Paiva Deboleto</li>
+          <li>Caren Naomi Aguero Ito</li>
+        </ul>
       </div>
     </aside>
   );

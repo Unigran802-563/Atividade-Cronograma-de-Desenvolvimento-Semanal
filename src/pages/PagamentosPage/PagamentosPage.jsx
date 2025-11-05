@@ -1,199 +1,270 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom"; // 1. Importar hooks
+import "./PagamentosPage.css"; // Importar o novo CSS
+import {
+  FaPix,
+  FaCreditCard,
+  FaMoneyBillWave,
+  FaPlus,
+  FaCheck,
+} from "react-icons/fa6"; // Ícones para métodos
 
 const PagamentosPage = () => {
+  const { idPedido, valorTotal } = useParams(); // 2. Pegar dados da URL
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     id_pagamento: "",
-    id_pedido: "",
+    id_pedido: idPedido || "",
     metodo_pagamento: "PIX",
-    valor_centavos: 0,
+    valor_centavos: valorTotal || 0,
     status: "pendente",
+    // Campos específicos
     bandeira: "",
     ultimos4: "",
     parcelas: 1,
-    autorizacao: "",
     chave_pix: "",
-    txid: "",
-    troco: 0,
+    valor_pago: "", // Para troco em dinheiro
   });
-  const [editandoId, setEditandoId] = useState(null);
+  const [mensagem, setMensagem] = useState("");
+  const [mensagemTipo, setMensagemTipo] = useState("");
 
   const API_URL = "http://localhost:3001";
 
+  // Efeito para atualizar o valor se ele mudar na URL
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      id_pedido: idPedido,
+      valor_centavos: valorTotal,
+    }));
+  }, [idPedido, valorTotal]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (["valor_centavos", "parcelas", "troco"].includes(name) && parseInt(value) < 0) return;
-
-    if (name === "metodo_pagamento") {
-      setFormData((prev) => ({
-        ...prev,
-        metodo_pagamento: value,
-        bandeira: "",
-        ultimos4: "",
-        parcelas: 1,
-        autorizacao: "",
-        chave_pix: "",
-        txid: "",
-        troco: 0,
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.id_pagamento || !formData.id_pedido) return;
+    if (!formData.id_pagamento || !formData.id_pedido) {
+      setMensagem("ID do Pagamento e do Pedido são obrigatórios.");
+      setMensagemTipo("erro");
+      return;
+    }
 
     try {
-      const method = editandoId ? "PUT" : "POST";
-      const url = editandoId
-        ? `${API_URL}/pagamento/${editandoId}`
-        : `${API_URL}/pagamento`;
-
-      await fetch(url, {
-        method,
+      // Lógica para enviar para a API (simplificada)
+      const res = await fetch(`${API_URL}/pagamento`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_pagamento: formData.id_pagamento,
           id_pedido: formData.id_pedido,
           metodo_pagamento: formData.metodo_pagamento,
-          valor_centavos: parseInt(formData.valor_centavos),
+          valor_centavos: formData.valor_centavos,
           status: formData.status,
+          // ...enviar dados específicos do método (bandeira, chave_pix, etc.)
         }),
       });
 
-      switch (formData.metodo_pagamento) {
-        case "CARTAO":
-          await fetch(`${API_URL}/pagamento_cartao`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id_pagamento: formData.id_pagamento,
-              bandeira: formData.bandeira,
-              ultimos4: formData.ultimos4,
-              parcelas: parseInt(formData.parcelas),
-              autorizacao: formData.autorizacao,
-            }),
-          });
-          break;
-        case "PIX":
-          await fetch(`${API_URL}/pagamento_pix`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id_pagamento: formData.id_pagamento,
-              chave_pix: formData.chave_pix,
-              txid: formData.txid,
-            }),
-          });
-          break;
-        case "DINHEIRO":
-          await fetch(`${API_URL}/pagamento_dinheiro`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id_pagamento: formData.id_pagamento,
-              troco: parseInt(formData.troco),
-            }),
-          });
-          break;
+      if (res.ok) {
+        setMensagem("Pagamento registrado com sucesso!");
+        setMensagemTipo("sucesso");
+        setTimeout(() => navigate(`/pedidos`), 2000); // Volta para a lista de pedidos
+      } else {
+        const data = await res.json();
+        setMensagem(
+          `Erro: ${data.error || "Não foi possível registrar o pagamento."}`
+        );
+        setMensagemTipo("erro");
       }
-
-      setFormData({
-        id_pagamento: "",
-        id_pedido: "",
-        metodo_pagamento: "PIX",
-        valor_centavos: 0,
-        status: "pendente",
-        bandeira: "",
-        ultimos4: "",
-        parcelas: 1,
-        autorizacao: "",
-        chave_pix: "",
-        txid: "",
-        troco: 0,
-      });
-      setEditandoId(null);
     } catch (err) {
-      console.error(err);
+      setMensagem(`Erro de conexão: ${err.message}`);
+      setMensagemTipo("erro");
     }
   };
 
-  const handleEditar = (pagamento) => {
-    setFormData({
-      id_pagamento: pagamento.id_pagamento,
-      id_pedido: pagamento.id_pedido,
-      metodo_pagamento: pagamento.metodo_pagamento,
-      valor_centavos: pagamento.valor_centavos,
-      status: pagamento.status,
-      bandeira: "",
-      ultimos4: "",
-      parcelas: 1,
-      autorizacao: "",
-      chave_pix: "",
-      txid: "",
-      troco: 0,
-    });
-    setEditandoId(pagamento.id_pagamento);
-  };
-
-  const handleCancelar = () => {
-    setFormData({
-      id_pagamento: "",
-      id_pedido: "",
-      metodo_pagamento: "PIX",
-      valor_centavos: 0,
-      status: "pendente",
-      bandeira: "",
-      ultimos4: "",
-      parcelas: 1,
-      autorizacao: "",
-      chave_pix: "",
-      txid: "",
-      troco: 0,
-    });
-    setEditandoId(null);
+  const renderMetodoPagamento = () => {
+    switch (formData.metodo_pagamento) {
+      case "CARTAO":
+        return (
+          <>
+            <div className="form-group">
+              <label htmlFor="bandeira">Bandeira</label>
+              <input
+                type="text"
+                id="bandeira"
+                name="bandeira"
+                value={formData.bandeira}
+                onChange={handleChange}
+                placeholder="Ex: Visa"
+              />
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="ultimos4">Últimos 4 dígitos</label>
+                <input
+                  type="text"
+                  id="ultimos4"
+                  name="ultimos4"
+                  value={formData.ultimos4}
+                  onChange={handleChange}
+                  maxLength="4"
+                  placeholder="1234"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="parcelas">Parcelas</label>
+                <input
+                  type="number"
+                  id="parcelas"
+                  name="parcelas"
+                  value={formData.parcelas}
+                  onChange={handleChange}
+                  min="1"
+                />
+              </div>
+            </div>
+          </>
+        );
+      case "PIX":
+        return (
+          <div className="form-group">
+            <label htmlFor="chave_pix">Chave PIX</label>
+            <input
+              type="text"
+              id="chave_pix"
+              name="chave_pix"
+              value={formData.chave_pix}
+              onChange={handleChange}
+              placeholder="email@exemplo.com ou CPF"
+            />
+          </div>
+        );
+      case "DINHEIRO":
+        const troco =
+          (parseFloat(formData.valor_pago) || 0) -
+          formData.valor_centavos / 100;
+        return (
+          <>
+            <div className="form-group">
+              <label htmlFor="valor_pago">Valor Pago pelo Cliente (R$)</label>
+              <input
+                type="number"
+                id="valor_pago"
+                name="valor_pago"
+                value={formData.valor_pago}
+                onChange={handleChange}
+                placeholder="50.00"
+                step="0.01"
+              />
+            </div>
+            {troco >= 0 && (
+              <div className="troco-display">
+                Troco: R$ {troco.toFixed(2).replace(".", ",")}
+              </div>
+            )}
+          </>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" name="id_pagamento" value={formData.id_pagamento} onChange={handleChange} disabled={editandoId} required />
-      <input type="text" name="id_pedido" value={formData.id_pedido} onChange={handleChange} required />
-      <select name="metodo_pagamento" value={formData.metodo_pagamento} onChange={handleChange}>
-        <option value="PIX">PIX</option>
-        <option value="CARTAO">Cartão</option>
-        <option value="DINHEIRO">Dinheiro</option>
-      </select>
-      <input type="number" name="valor_centavos" value={formData.valor_centavos} onChange={handleChange} min={0} required />
-      <select name="status" value={formData.status} onChange={handleChange}>
-        <option value="pendente">Pendente</option>
-        <option value="pago">Pago</option>
-        <option value="recusado">Recusado</option>
-      </select>
+    <div className="page-container">
+      <header className="page-header">
+        <h1>Registro de Pagamento</h1>
+        <p>Finalize o pedido #{idPedido} registrando o pagamento.</p>
+      </header>
 
-      {formData.metodo_pagamento === "CARTAO" && (
-        <>
-          <input type="text" name="bandeira" value={formData.bandeira} onChange={handleChange} placeholder="Bandeira" />
-          <input type="text" name="ultimos4" value={formData.ultimos4} onChange={handleChange} placeholder="Últimos 4 dígitos" />
-          <input type="number" name="parcelas" value={formData.parcelas} onChange={handleChange} min={1} />
-          <input type="text" name="autorizacao" value={formData.autorizacao} onChange={handleChange} placeholder="Autorização" />
-        </>
-      )}
+      {mensagem && <div className={`message ${mensagemTipo}`}>{mensagem}</div>}
 
-      {formData.metodo_pagamento === "PIX" && (
-        <>
-          <input type="text" name="chave_pix" value={formData.chave_pix} onChange={handleChange} placeholder="Chave PIX" />
-          <input type="text" name="txid" value={formData.txid} onChange={handleChange} placeholder="TXID" />
-        </>
-      )}
+      <div className="payment-container">
+        <div className="form-card">
+          <h2>Detalhes do Pagamento</h2>
+          <form onSubmit={handleSubmit} className="main-form">
+            <div className="total-display-form">
+              <span>Valor Total a Pagar:</span>
+              <span className="total-value">
+                R${" "}
+                {(formData.valor_centavos / 100).toFixed(2).replace(".", ",")}
+              </span>
+            </div>
 
-      {formData.metodo_pagamento === "DINHEIRO" && (
-        <input type="number" name="troco" value={formData.troco} onChange={handleChange} min={0} />
-      )}
+            <div className="form-group">
+              <label>Método de Pagamento</label>
+              <div className="metodo-pagamento-group">
+                <button
+                  type="button"
+                  className={`metodo-btn ${
+                    formData.metodo_pagamento === "PIX" ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      metodo_pagamento: "PIX",
+                    }))
+                  }
+                >
+                  <FaPix /> PIX
+                </button>
+                <button
+                  type="button"
+                  className={`metodo-btn ${
+                    formData.metodo_pagamento === "CARTAO" ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      metodo_pagamento: "CARTAO",
+                    }))
+                  }
+                >
+                  <FaCreditCard /> Cartão
+                </button>
+                <button
+                  type="button"
+                  className={`metodo-btn ${
+                    formData.metodo_pagamento === "DINHEIRO" ? "active" : ""
+                  }`}
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      metodo_pagamento: "DINHEIRO",
+                    }))
+                  }
+                >
+                  <FaMoneyBillWave /> Dinheiro
+                </button>
+              </div>
+            </div>
 
-      <button type="submit">{editandoId ? "Atualizar" : "Cadastrar"}</button>
-      {editandoId && <button type="button" onClick={handleCancelar}>Cancelar</button>}
-    </form>
+            <div className="form-group">
+              <label htmlFor="id_pagamento">ID do Pagamento *</label>
+              <input
+                type="text"
+                id="id_pagamento"
+                name="id_pagamento"
+                value={formData.id_pagamento}
+                onChange={handleChange}
+                required
+                placeholder="Ex: PAG-2025-001"
+              />
+            </div>
+
+            {renderMetodoPagamento()}
+
+            <div className="form-actions">
+              <button type="submit" className="btn btn-success">
+                <FaCheck /> Confirmar Pagamento
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 

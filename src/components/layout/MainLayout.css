@@ -1,15 +1,23 @@
+/* :root {
+  --sidebar-width: 250px;
+  --espacamento-lg: 20px;
+  --espacamento-md: 15px;
+} */
+
 .main-layout {
   display: flex;
   min-height: 100vh;
-  background-color: var(--cor-preto);
+  /* Removendo a cor de fundo escura */
 }
 
 .main-content {
-  margin-left: var(--sidebar-width);
+  /* A margem deve ser a largura da sidebar */
+  margin-left: var(--sidebar-width); 
   flex: 1;
   padding: var(--espacamento-lg);
-  background-color: var(--cor-preto);
+  
   min-height: 100vh;
+  transition: margin-left 0.3s ease;
 }
 
 /* Responsividade */
@@ -19,4 +27,3 @@
     padding: var(--espacamento-md);
   }
 }
-

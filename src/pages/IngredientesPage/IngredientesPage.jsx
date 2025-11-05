@@ -174,7 +174,7 @@ const IngredientesPage = () => {
                 <option value="">Selecione a unidade</option>
                 <option value="kg">Quilograma (kg)</option>
                 <option value="g">Grama (g)</option>
-                <option value="l">Litro (l)</option>
+                <option value="L">Litro (L)</option>
                 <option value="ml">Mililitro (ml)</option>
                 <option value="un">Unidade (un)</option>
               </select>
