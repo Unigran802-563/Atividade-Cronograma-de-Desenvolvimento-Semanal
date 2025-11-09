@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import "./PratoIngredientes.css";
-// 1. IMPORTAR OS ÍCONES CORRETOS (FaEdit, FaTrash)
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import "./PratoIngredientes.css";
 
 const PratoIngredientes = () => {
-  // ... (toda a lógica do componente permanece a mesma)
   const [pratoIngrediente, setPratoIngrediente] = useState([]);
   const [pratos, setPratos] = useState([]);
   const [ingredientes, setIngredientes] = useState([]);
@@ -19,6 +18,7 @@ const PratoIngredientes = () => {
   const [mensagemTipo, setMensagemTipo] = useState("");
 
   const API_URL = "http://localhost:3001";
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPratoIngrediente();
@@ -26,14 +26,37 @@ const PratoIngredientes = () => {
     fetchIngredientes();
   }, []);
 
+  const limparMensagem = (tempo = 3000) => {
+    setTimeout(() => {
+      setMensagem("");
+      setMensagemTipo("");
+    }, tempo);
+  };
+
+  const exibirMensagem = (texto, tipo = "erro", tempo = 3000) => {
+    setMensagem(texto);
+    setMensagemTipo(tipo);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    limparMensagem(tempo);
+  };
+
+  const limparFormulario = () => {
+    setFormData({
+      id_prato: "",
+      id_ingrediente_temp: "",
+      quantidade_temp: "",
+    });
+    setIngredientesSelecionados([]);
+    setEditando(null);
+  };
+
   const fetchPratoIngrediente = async () => {
     try {
       const res = await fetch(`${API_URL}/pratos_ingredientes`);
       const data = await res.json();
       setPratoIngrediente(data);
     } catch (err) {
-      setMensagem(`Erro ao buscar dados: ${err.message}`);
-      setMensagemTipo("erro");
+      exibirMensagem(`Erro ao buscar dados: ${err.message}`);
     }
   };
 
@@ -42,7 +65,7 @@ const PratoIngredientes = () => {
       const res = await fetch(`${API_URL}/pratos`);
       setPratos(await res.json());
     } catch (err) {
-      console.error("Erro ao buscar pratos:", err);
+      exibirMensagem("Erro ao buscar pratos!");
     }
   };
 
@@ -51,7 +74,7 @@ const PratoIngredientes = () => {
       const res = await fetch(`${API_URL}/ingredientes`);
       setIngredientes(await res.json());
     } catch (err) {
-      console.error("Erro ao buscar ingredientes:", err);
+      exibirMensagem("Erro ao buscar ingredientes!");
     }
   };
 
@@ -60,34 +83,25 @@ const PratoIngredientes = () => {
 
   const handleAdicionarIngrediente = () => {
     const { id_ingrediente_temp, quantidade_temp } = formData;
-
     if (!id_ingrediente_temp || !quantidade_temp) {
-      setMensagem("Selecione o ingrediente e informe a quantidade!");
-      setMensagemTipo("erro");
+      exibirMensagem("Selecione o ingrediente e informe a quantidade!");
       return;
     }
-
     const quantidadeNum = parseFloat(quantidade_temp.replace(",", "."));
     if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
-      setMensagem("Informe uma quantidade válida maior que zero!");
-      setMensagemTipo("erro");
+      exibirMensagem("Informe uma quantidade válida maior que zero!");
       return;
     }
-
     const ingredienteJaExiste = ingredientesSelecionados.some(
       (i) => i.id_ingrediente === id_ingrediente_temp
     );
-
     if (ingredienteJaExiste) {
-      setMensagem("Esse ingrediente já foi adicionado!");
-      setMensagemTipo("erro");
+      exibirMensagem("Esse ingrediente já foi adicionado!");
       return;
     }
-
     const ingrediente = ingredientes.find(
       (i) => i.id_ingrediente === id_ingrediente_temp
     );
-
     setIngredientesSelecionados([
       ...ingredientesSelecionados,
       {
@@ -97,34 +111,25 @@ const PratoIngredientes = () => {
         quantidade_utilizada: quantidadeNum,
       },
     ]);
-
     setFormData({ ...formData, id_ingrediente_temp: "", quantidade_temp: "" });
-    setMensagem("");
   };
 
   const handleRemoverIngrediente = (id_ingrediente) => {
     setIngredientesSelecionados(
-      ingredientesSelecionados.filter(
-        (i) => i.id_ingrediente !== id_ingrediente
-      )
+      ingredientesSelecionados.filter((i) => i.id_ingrediente !== id_ingrediente)
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.id_prato) {
-      setMensagem("Selecione o prato!");
-      setMensagemTipo("erro");
+      exibirMensagem("Selecione o prato!");
       return;
     }
-
     if (ingredientesSelecionados.length === 0) {
-      setMensagem("Adicione ao menos um ingrediente!");
-      setMensagemTipo("erro");
+      exibirMensagem("Adicione ao menos um ingrediente!");
       return;
     }
-
     try {
       for (const ingrediente of ingredientesSelecionados) {
         await fetch(`${API_URL}/prato_ingrediente`, {
@@ -137,19 +142,11 @@ const PratoIngredientes = () => {
           }),
         });
       }
-
-      setMensagem("Ingredientes do prato cadastrados com sucesso!");
-      setMensagemTipo("sucesso");
-      setFormData({
-        id_prato: "",
-        id_ingrediente_temp: "",
-        quantidade_temp: "",
-      });
-      setIngredientesSelecionados([]);
+      exibirMensagem("Ingredientes do prato cadastrados com sucesso!", "sucesso");
+      limparFormulario();
       fetchPratoIngrediente();
     } catch (err) {
-      setMensagem(`Erro ao cadastrar: ${err.message}`);
-      setMensagemTipo("erro");
+      exibirMensagem(`Erro ao cadastrar: ${err.message}`);
     }
   };
 
@@ -160,21 +157,16 @@ const PratoIngredientes = () => {
       id_ingrediente_temp: pi.id_ingrediente,
       quantidade_temp: pi.quantidade_utilizada.toString().replace(".", ","),
     });
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleAtualizar = async () => {
     if (!editando) return;
-
-    const quantidadeNum = parseFloat(
-      formData.quantidade_temp.replace(",", ".")
-    );
+    const quantidadeNum = parseFloat(formData.quantidade_temp.replace(",", "."));
     if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
-      setMensagem("Informe uma quantidade válida maior que zero!");
-      setMensagemTipo("erro");
+      exibirMensagem("Informe uma quantidade válida maior que zero!");
       return;
     }
-
     try {
       const res = await fetch(
         `${API_URL}/prato_ingrediente/${editando.id_prato}/${editando.id_ingrediente}`,
@@ -187,24 +179,13 @@ const PratoIngredientes = () => {
           }),
         }
       );
-
       if (res.ok) {
-        setMensagem("Quantidade atualizada com sucesso!");
-        setMensagemTipo("sucesso");
-        setEditando(null);
-        setFormData({
-          id_prato: "",
-          id_ingrediente_temp: "",
-          quantidade_temp: "",
-        });
+        exibirMensagem("Quantidade atualizada com sucesso!", "sucesso");
+        limparFormulario();
         fetchPratoIngrediente();
-      } else {
-        setMensagem("Erro ao atualizar ingrediente!");
-        setMensagemTipo("erro");
-      }
+      } else exibirMensagem("Erro ao atualizar ingrediente!");
     } catch (err) {
-      setMensagem(`Erro ao atualizar: ${err.message}`);
-      setMensagemTipo("erro");
+      exibirMensagem(`Erro ao atualizar: ${err.message}`);
     }
   };
 
@@ -216,17 +197,11 @@ const PratoIngredientes = () => {
         { method: "DELETE" }
       );
       if (res.ok) {
-        setMensagem("Relação deletada com sucesso!");
-        setMensagemTipo("sucesso");
+        exibirMensagem("Relação deletada com sucesso!", "sucesso");
         fetchPratoIngrediente();
-      } else {
-        const data = await res.json();
-        setMensagem(`Erro ao deletar: ${data.error}`);
-        setMensagemTipo("erro");
-      }
+      } else exibirMensagem("Erro ao deletar!");
     } catch (err) {
-      setMensagem(`Erro ao deletar: ${err.message}`);
-      setMensagemTipo("erro");
+      exibirMensagem(`Erro ao deletar: ${err.message}`);
     }
   };
 
@@ -237,6 +212,11 @@ const PratoIngredientes = () => {
   const getMedidaIngrediente = (id) =>
     ingredientes.find((i) => i.id_ingrediente === id)?.unidade_medida || "-";
 
+  const redirecionar = (path) => {
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="page-container">
       <header className="page-header">
@@ -244,16 +224,11 @@ const PratoIngredientes = () => {
         <p>Associe ingredientes e suas quantidades a cada prato do cardápio.</p>
       </header>
 
-      {mensagem && <div className={`message ${mensagemTipo}`}>{mensagem}</div>}
+      {mensagem && <div className={`message ${mensagemTipo}`}><p>{mensagem}</p></div>}
 
       <div className="main-container">
         <div className="form-card">
-          {/* ... O formulário continua o mesmo ... */}
-          <h2>
-            {editando
-              ? "Editar Ingrediente"
-              : "Adicionar Ingredientes ao Prato"}
-          </h2>
+          <h2>{editando ? "Editar Ingrediente" : "Adicionar Ingredientes ao Prato"}</h2>
           <form onSubmit={handleSubmit} className="main-form">
             <div className="form-group">
               <label htmlFor="id_prato">Prato</label>
@@ -272,6 +247,14 @@ const PratoIngredientes = () => {
                   </option>
                 ))}
               </select>
+              {pratos.length === 0 && (
+                <>
+                  <p>Nenhum prato cadastrado. Cadastre um prato primeiro!</p>
+                  <button type="button" className="btn btn-success" onClick={() => redirecionar("/pratos")}>
+                    Cadastrar prato
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="add-ingredient-section">
@@ -292,11 +275,19 @@ const PratoIngredientes = () => {
                       </option>
                     ))}
                   </select>
+                  {ingredientes.length === 0 && (
+                    <>
+                      <p>Nenhum ingrediente cadastrado. Cadastre um ingrediente primeiro!</p>
+                      <button type="button" className="btn btn-success" onClick={() => redirecionar("/ingredientes")}>
+                        Cadastrar ingrediente
+                      </button>
+                    </>
+                  )}
                 </div>
+
                 <div className="form-group">
                   <label htmlFor="quantidade_temp">
-                    Quantidade (
-                    {getMedidaIngrediente(formData.id_ingrediente_temp)})
+                    Quantidade ({getMedidaIngrediente(formData.id_ingrediente_temp)})
                   </label>
                   <input
                     type="text"
@@ -308,52 +299,38 @@ const PratoIngredientes = () => {
                   />
                 </div>
               </div>
+
               <div className="form-actions">
                 {editando ? (
                   <>
-                    <button
-                      type="button"
-                      className="btn btn-update"
-                      onClick={handleAtualizar}
-                    >
+                    <button type="button" className="btn btn-success" onClick={handleAtualizar}>
                       Atualizar
                     </button>
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      onClick={() => {
-                        setEditando(null);
-                        setFormData({
-                          ...formData,
-                          id_ingrediente_temp: "",
-                          quantidade_temp: "",
-                        });
-                      }}
+                      onClick={() => limparFormulario()}
                     >
                       Cancelar
                     </button>
                   </>
                 ) : (
-                  <button
-                    type="button"
-                    className="btn btn-add"
-                    onClick={handleAdicionarIngrediente}
-                  >
+                  <button type="button" className="btn btn-add" onClick={handleAdicionarIngrediente}>
                     Adicionar à Lista
                   </button>
                 )}
               </div>
             </div>
+
             {ingredientesSelecionados.length > 0 && (
               <div className="selected-items-list">
                 <h3>Ingredientes a serem salvos</h3>
-                {/* 1. APLICAR O NOVO CLASSNAME */}
                 <table className="tabela-temporaria">
                   <thead>
                     <tr>
                       <th>Ingrediente</th>
                       <th>Quantidade</th>
-                      <th className="acao-header">Ação</th>
+                      <th>Ação</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -361,14 +338,11 @@ const PratoIngredientes = () => {
                       <tr key={i.id_ingrediente}>
                         <td>{i.nome}</td>
                         <td>{`${i.quantidade_utilizada} ${i.medida}`}</td>
-                        <td className="actions-cell">
+                        <td>
                           <button
                             type="button"
                             className="btn-icon btn-delete"
-                            title="Remover Ingrediente"
-                            onClick={() =>
-                              handleRemoverIngrediente(i.id_ingrediente)
-                            }
+                            onClick={() => handleRemoverIngrediente(i.id_ingrediente)}
                           >
                             <FaTrash color="#EF4444" />
                           </button>
@@ -399,40 +373,24 @@ const PratoIngredientes = () => {
           ) : (
             <div className="lista-grid">
               {pratoIngrediente.map((pi) => (
-                <div
-                  className="item-card"
-                  key={`${pi.id_prato}-${pi.id_ingrediente}`}
-                >
+                <div className="item-card" key={`${pi.id_prato}-${pi.id_ingrediente}`}>
                   <div className="item-info">
-                    <span className="item-categoria">
-                      {getNomePrato(pi.id_prato)}
-                    </span>
-                    <h3>{getNomeIngrediente(pi.id_ingrediente)}</h3>
-                    <div className="item-detalhes">
-                      <span className="item-quantidade">
-                        {`${pi.quantidade_utilizada
-                          .toString()
-                          .replace(".", ",")} ${getMedidaIngrediente(
-                          pi.id_ingrediente
-                        )}`}
-                      </span>
-                    </div>
+                    <h3>Prato: {getNomePrato(pi.id_prato)}</h3>
+                    <p>Ingrediente: {getNomeIngrediente(pi.id_ingrediente)}</p>
+                    <p>
+                      Quantidade:{" "}
+                      {`${pi.quantidade_utilizada.toString().replace(".", ",")} ${getMedidaIngrediente(
+                        pi.id_ingrediente
+                      )}`}
+                    </p>
                   </div>
-                  {/* 2. USAR OS ÍCONES CORRETOS COM A PROP 'color' */}
                   <div className="item-acoes">
-                    <button
-                      className="btn-icon btn-edit"
-                      onClick={() => handleEditar(pi)}
-                      title="Editar"
-                    >
+                    <button className="btn-icon btn-edit" onClick={() => handleEditar(pi)}>
                       <FaEdit color="#10B981" />
                     </button>
                     <button
                       className="btn-icon btn-delete"
-                      onClick={() =>
-                        handleDeletar(pi.id_prato, pi.id_ingrediente)
-                      }
-                      title="Deletar"
+                      onClick={() => handleDeletar(pi.id_prato, pi.id_ingrediente)}
                     >
                       <FaTrash color="#EF4444" />
                     </button>

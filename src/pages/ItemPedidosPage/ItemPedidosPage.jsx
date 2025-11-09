@@ -1,35 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./ItemPedidosPage.css";
-import { FaEdit, FaTrash, FaPlus, FaCheck, FaCreditCard } from "react-icons/fa";
+import { FaEdit, FaTrash, FaCreditCard } from "react-icons/fa";
 
 const ItemPedidosPage = () => {
   const navigate = useNavigate();
-  const { idPedido: idPedidoUrl } = useParams(); // Renomeado para evitar conflito
-
-  // State para os dados brutos da API
+  const { idPedido: idPedidoUrl } = useParams();
   const [todosOsItens, setTodosOsItens] = useState([]);
   const [pedidos, setPedidos] = useState([]);
   const [pratos, setPratos] = useState([]);
-
-  // State para controle da UI
-  const [pedidoSelecionadoId, setPedidoSelecionadoId] = useState(
-    idPedidoUrl || ""
-  );
+  const [pedidoSelecionadoId, setPedidoSelecionadoId] = useState(idPedidoUrl || "");
   const [itensFiltrados, setItensFiltrados] = useState([]);
   const [totalPedido, setTotalPedido] = useState(0);
-  const [formData, setFormData] = useState({
-    id_item: "",
-    id_prato: "",
-    quantidade: "",
-  });
+  const [formData, setFormData] = useState({ id_item: "", id_prato: "", quantidade: "" });
   const [editandoId, setEditandoId] = useState(null);
   const [mensagem, setMensagem] = useState("");
   const [mensagemTipo, setMensagemTipo] = useState("");
-
   const API_URL = "http://localhost:3001";
 
-  // 1. BUSCA TODOS OS DADOS NECESSÁRIOS NA INICIALIZAÇÃO
   useEffect(() => {
     const fetchDadosIniciais = async () => {
       try {
@@ -44,19 +32,18 @@ const ItemPedidosPage = () => {
       } catch (err) {
         setMensagem(`Erro ao carregar dados iniciais: ${err.message}`);
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
     fetchDadosIniciais();
   }, []);
 
-  // 2. FILTRA OS ITENS E CALCULA O TOTAL QUANDO O PEDIDO SELECIONADO MUDA
   useEffect(() => {
     if (pedidoSelecionadoId) {
       const itensDoPedido = todosOsItens.filter(
         (item) => item.id_pedido === pedidoSelecionadoId
       );
       setItensFiltrados(itensDoPedido);
-
       const total = itensDoPedido.reduce(
         (acc, item) => acc + item.subtotal_centavos,
         0
@@ -70,6 +57,7 @@ const ItemPedidosPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "quantidade" && parseInt(value, 10) < 1) return;
     setFormData({ ...formData, [name]: value });
   };
 
@@ -79,24 +67,46 @@ const ItemPedidosPage = () => {
     if (!pedidoSelecionadoId) {
       setMensagem("Por favor, selecione um pedido antes de adicionar um item.");
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    const { id_item, id_prato, quantidade } = formData;
-    if (!id_item || !id_prato || !quantidade) {
-      setMensagem("ID do Item, Prato e Quantidade são obrigatórios!");
+    const camposObrigatorios = ["id_item", "id_prato", "quantidade"];
+    for (const campo of camposObrigatorios) {
+      if (!formData[campo]?.trim()) {
+        setMensagem(`O campo "${campo}" é obrigatório!`);
+        setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+
+    const quantidadeNum = parseInt(formData.quantidade, 10);
+    if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
+      setMensagem("A quantidade deve ser um número positivo!");
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    const pratoSelecionado = pratos.find((p) => p.id_prato === id_prato);
+    const pratoSelecionado = pratos.find((p) => p.id_prato === formData.id_prato);
     if (!pratoSelecionado) {
-      setMensagem("Prato selecionado é inválido.");
+      setMensagem("Prato selecionado é inválido!");
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    const quantidadeNum = parseInt(quantidade, 10);
+    if (!editandoId) {
+      const idJaExiste = todosOsItens.some((item) => item.id_item === formData.id_item);
+      if (idJaExiste) {
+        setMensagem(`O ID "${formData.id_item}" já existe. Escolha outro ID.`);
+        setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+
     const subtotalCentavos = pratoSelecionado.preco_centavos * quantidadeNum;
 
     try {
@@ -109,9 +119,9 @@ const ItemPedidosPage = () => {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id_item,
+          id_item: formData.id_item,
           id_pedido: pedidoSelecionadoId,
-          id_prato,
+          id_prato: formData.id_prato,
           quantidade: quantidadeNum,
           subtotal_centavos: subtotalCentavos,
         }),
@@ -119,20 +129,21 @@ const ItemPedidosPage = () => {
 
       const data = await res.json();
       if (res.ok) {
-        setMensagem(
-          editandoId ? "Item atualizado!" : "Item adicionado ao pedido!"
-        );
+        setMensagem(editandoId ? "Item atualizado!" : "Item adicionado com sucesso!");
         setMensagemTipo("sucesso");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         handleCancelar();
         const resItens = await fetch(`${API_URL}/itempedidos`);
         setTodosOsItens(await resItens.json());
       } else {
         setMensagem(`Erro: ${data.error || "Não foi possível salvar o item."}`);
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
       setMensagem(`Erro de conexão: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -143,7 +154,7 @@ const ItemPedidosPage = () => {
       id_prato: item.id_prato,
       quantidade: item.quantidade.toString(),
     });
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancelar = () => {
@@ -152,30 +163,29 @@ const ItemPedidosPage = () => {
   };
 
   const handleDeletar = async (id) => {
-    if (!window.confirm("Deseja realmente remover este item do pedido?"))
-      return;
+    if (!window.confirm("Deseja realmente remover este item do pedido?")) return;
     try {
-      const res = await fetch(`${API_URL}/itempedido/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`${API_URL}/itempedido/${id}`, { method: "DELETE" });
       if (res.ok) {
         setMensagem("Item removido com sucesso!");
         setMensagemTipo("sucesso");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         const resItens = await fetch(`${API_URL}/itempedidos`);
         setTodosOsItens(await resItens.json());
       } else {
         const data = await res.json();
-        setMensagem(`Erro: ${data.error || "Não foi possível remover."}`);
+        setMensagem(`Erro: ${data.error || "Não foi possível remover o item."}`);
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
       setMensagem(`Erro de conexão: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  const getNomePrato = (id) =>
-    pratos.find((p) => p.id_prato === id)?.nome || id;
+  const getNomePrato = (id) => pratos.find((p) => p.id_prato === id)?.nome || id;
 
   return (
     <div className="page-container">
@@ -186,11 +196,8 @@ const ItemPedidosPage = () => {
 
       {mensagem && <div className={`message ${mensagemTipo}`}>{mensagem}</div>}
 
-      {/* 3. CAMPO PARA SELECIONAR O PEDIDO */}
       <div className="pedido-selector-card">
-        <label htmlFor="pedido-selector">
-          Selecione o Pedido para Gerenciar
-        </label>
+        <label htmlFor="pedido-selector">Selecione o Pedido</label>
         <select
           id="pedido-selector"
           value={pedidoSelecionadoId}
@@ -205,28 +212,28 @@ const ItemPedidosPage = () => {
         </select>
       </div>
 
-      {/* O conteúdo só aparece se um pedido for selecionado */}
       {pedidoSelecionadoId && (
         <>
           <div className="main-container">
             <div className="form-card">
-              <h2>{editandoId ? "Editar Item" : "Adicionar Novo Item"}</h2>
+              <h2>{editandoId ? "Editar Item" : "Adicionar Item"}</h2>
               <form onSubmit={handleSubmit} className="main-form">
                 <div className="form-group">
-                  <label htmlFor="id_item">ID do Item *</label>
+                  <label htmlFor="id_item">ID do Item</label>
                   <input
                     type="text"
                     id="id_item"
                     name="id_item"
                     value={formData.id_item}
                     onChange={handleChange}
+                    placeholder="EX: ITE-001"
                     required
                     disabled={!!editandoId}
-                    placeholder="Ex: IT001"
                   />
                 </div>
+
                 <div className="form-group">
-                  <label htmlFor="id_prato">Prato *</label>
+                  <label htmlFor="id_prato">Prato</label>
                   <select
                     id="id_prato"
                     name="id_prato"
@@ -241,31 +248,38 @@ const ItemPedidosPage = () => {
                       </option>
                     ))}
                   </select>
+                  {pratos.length === 0 && (
+                    <div className="sem-prato">
+                      <p>Nenhum prato cadastrado. Cadastre um prato primeiro!</p>
+                      <button
+                        type="button"
+                        className="btn btn-success"
+                        onClick={() => navigate("/pratos")}
+                      >
+                        Cadastrar Prato
+                      </button>
+                    </div>
+                  )}
                 </div>
+
                 <div className="form-group">
-                  <label htmlFor="quantidade">Quantidade *</label>
+                  <label htmlFor="quantidade">Quantidade</label>
                   <input
                     type="number"
                     id="quantidade"
                     name="quantidade"
                     min="1"
+                    step="1"
                     value={formData.quantidade}
                     onChange={handleChange}
+                    placeholder="Ex: 1"
                     required
-                    placeholder="Ex: 2"
                   />
                 </div>
+
                 <div className="form-actions">
                   <button type="submit" className="btn btn-success">
-                    {editandoId ? (
-                      <>
-                        <FaCheck /> Atualizar Item
-                      </>
-                    ) : (
-                      <>
-                        <FaPlus /> Adicionar Item
-                      </>
-                    )}
+                    {editandoId ? "Atualizar Item" : "Adicionar Item"}
                   </button>
                   {editandoId && (
                     <button
@@ -283,24 +297,18 @@ const ItemPedidosPage = () => {
             <div className="lista-card">
               <h2>Itens no Pedido #{pedidoSelecionadoId}</h2>
               {itensFiltrados.length === 0 ? (
-                <p className="lista-vazia">
-                  Nenhum item adicionado a este pedido ainda.
-                </p>
+                <p className="lista-vazia">Nenhum item adicionado a este pedido.</p>
               ) : (
                 <div className="lista-grid">
                   {itensFiltrados.map((item) => (
                     <div className="item-card" key={item.id_item}>
                       <div className="item-info">
-                        <h3>{getNomePrato(item.id_prato)}</h3>
-                        <p className="item-descricao">Item #{item.id_item}</p>
-                        <div className="item-detalhes">
-                          <span className="item-preco">
-                            R$ {(item.subtotal_centavos / 100).toFixed(2)}
-                          </span>
-                          <span className="item-quantidade">
-                            Quantidade: {item.quantidade}
-                          </span>
-                        </div>
+                        <h3>ID: {item.id_item}</h3>
+                        <p>Prato: {getNomePrato(item.id_prato)}</p>
+                        <p>Quantidade: {item.quantidade}</p>
+                        <p>
+                          Subtotal: R$ {(item.subtotal_centavos / 100).toFixed(2).replace(".", ",")}
+                        </p>
                       </div>
                       <div className="item-acoes">
                         <button

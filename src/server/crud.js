@@ -251,17 +251,17 @@ app.delete("/estoque/:id", async (req, res) => {
 });
 
 // -------------------- CRUD Prato --------------------
+//Criação
 app.post("/pratos", async (req, res) => {
-  const { id_prato, nome, descricao, preco, categoria, disponivel } = req.body;
+  const { id_prato, nome, descricao, preco_centavos, categoria} = req.body;
 
   try {
     const db = await openDb();
 
-    // Inserir prato (id_prato será auto-incrementado)
     const result = await db.run(
       `INSERT INTO Prato (id_prato, nome, descricao, preco_centavos, categoria) 
        VALUES (?, ?, ?, ?, ?)`,
-      [id_prato, nome, descricao, preco, categoria]
+      [id_prato, nome, descricao, preco_centavos, categoria]
     );
 
     res.json({
@@ -273,28 +273,17 @@ app.post("/pratos", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 // Listagem de Pratos
 app.get("/pratos", async (req, res) => {
   try {
     const db = await openDb();
     const pratos = await db.all("SELECT * FROM Prato");
-
-    // Adicionar campo 'disponivel' como true por padrão
-    const pratosComDisponivel = pratos.map((prato) => ({
-      ...prato,
-      id: prato.id_prato,
-      preco: prato.preco_centavos,
-      disponivel: true, // Pode ajustar conforme sua lógica
-    }));
-
-    res.json(pratosComDisponivel);
+    res.json(pratos);
   } catch (err) {
     console.error("Erro ao listar pratos:", err);
     res.status(500).json({ error: err.message });
   }
 });
-
 // Buscar Prato por ID
 app.get("/pratos/:id", async (req, res) => {
   const { id } = req.params;
@@ -307,22 +296,16 @@ app.get("/pratos/:id", async (req, res) => {
       return res.status(404).json({ error: "Prato não encontrado" });
     }
 
-    res.json({
-      ...prato,
-      id: prato.id_prato,
-      preco: prato.preco_centavos,
-      disponivel: true,
-    });
+    res.json(prato);
   } catch (err) {
     console.error("Erro ao buscar prato:", err);
     res.status(500).json({ error: err.message });
   }
 });
-
 // Atualização de Prato
 app.put("/pratos/:id", async (req, res) => {
   const { id } = req.params;
-  const { nome, descricao, preco, categoria, disponivel } = req.body;
+  const { nome, descricao, preco_centavos, categoria} = req.body;
 
   try {
     const db = await openDb();
@@ -331,7 +314,7 @@ app.put("/pratos/:id", async (req, res) => {
       `UPDATE Prato 
        SET nome=?, descricao=?, preco_centavos=?, categoria=? 
        WHERE id_prato=?`,
-      [nome, descricao, preco, categoria, id]
+      [nome, descricao, preco_centavos, categoria, id]
     );
 
     res.json({ message: "Prato atualizado com sucesso!" });
@@ -340,7 +323,6 @@ app.put("/pratos/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 // Exclusão de Prato
 app.delete("/pratos/:id", async (req, res) => {
   const { id } = req.params;

@@ -1,44 +1,60 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // 1. Importar hooks
-import "./PagamentosPage.css"; // Importar o novo CSS
-import {
-  FaPix,
-  FaCreditCard,
-  FaMoneyBillWave,
-  FaPlus,
-  FaCheck,
-} from "react-icons/fa6"; // Ícones para métodos
+import { useParams, useNavigate } from "react-router-dom";
+import "./PagamentosPage.css";
+import { FaPix, FaCreditCard, FaMoneyBillWave } from "react-icons/fa6";
 
 const PagamentosPage = () => {
-  const { idPedido, valorTotal } = useParams(); // 2. Pegar dados da URL
+  const { idPedido, valorTotal } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     id_pagamento: "",
     id_pedido: idPedido || "",
     metodo_pagamento: "PIX",
-    valor_centavos: valorTotal || 0,
+    valor_centavos: Number(valorTotal) || 0,
     status: "pendente",
-    // Campos específicos
     bandeira: "",
     ultimos4: "",
     parcelas: 1,
     chave_pix: "",
-    valor_pago: "", // Para troco em dinheiro
+    valor_pago: "",
   });
+
   const [mensagem, setMensagem] = useState("");
   const [mensagemTipo, setMensagemTipo] = useState("");
+  const [pagamentosExistentes, setPagamentosExistentes] = useState([]);
 
   const API_URL = "http://localhost:3001";
 
-  // Efeito para atualizar o valor se ele mudar na URL
+  useEffect(() => {
+    const fetchPagamentos = async () => {
+      try {
+        const res = await fetch(`${API_URL}/pagamentos`);
+        if (res.ok) {
+          setPagamentosExistentes(await res.json());
+        }
+      } catch (err) {
+        console.error("Erro ao buscar pagamentos:", err);
+      }
+    };
+    fetchPagamentos();
+  }, []);
+
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       id_pedido: idPedido,
-      valor_centavos: valorTotal,
+      valor_centavos: Number(valorTotal),
     }));
   }, [idPedido, valorTotal]);
+
+  useEffect(() => {
+    if (mensagem) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      const timer = setTimeout(() => setMensagem(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [mensagem]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,43 +63,81 @@ const PagamentosPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.id_pagamento || !formData.id_pedido) {
-      setMensagem("ID do Pagamento e do Pedido são obrigatórios.");
+
+    const idJaExiste = pagamentosExistentes.some(
+      (p) => p.id_pagamento === formData.id_pagamento
+    );
+    if (idJaExiste) {
+      setMensagem("Já existe um pagamento com este ID!");
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    let camposObrigatorios = ["id_pagamento"];
+    switch (formData.metodo_pagamento) {
+      case "CARTAO":
+        camposObrigatorios.push("bandeira", "ultimos4", "parcelas");
+        break;
+      case "PIX":
+        camposObrigatorios.push("chave_pix");
+        break;
+      case "DINHEIRO":
+        camposObrigatorios.push("valor_pago");
+        break;
+      default:
+        break;
+    }
+
+    for (const campo of camposObrigatorios) {
+      if (!formData[campo]?.toString().trim()) {
+        setMensagem(`O campo "${campo}" é obrigatório!`);
+        setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+
+    if (
+      formData.metodo_pagamento === "DINHEIRO" &&
+      parseFloat(formData.valor_pago) < formData.valor_centavos / 100
+    ) {
+      setMensagem(
+        "O valor pago deve ser suficiente para cobrir o total do pedido!"
+      );
+      setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     try {
-      // Lógica para enviar para a API (simplificada)
       const res = await fetch(`${API_URL}/pagamento`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id_pagamento: formData.id_pagamento,
-          id_pedido: formData.id_pedido,
-          metodo_pagamento: formData.metodo_pagamento,
-          valor_centavos: formData.valor_centavos,
-          status: formData.status,
-          // ...enviar dados específicos do método (bandeira, chave_pix, etc.)
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (res.ok) {
         setMensagem("Pagamento registrado com sucesso!");
         setMensagemTipo("sucesso");
-        setTimeout(() => navigate(`/pedidos`), 2000); // Volta para a lista de pedidos
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => navigate(`/pedidos`), 2000);
       } else {
         const data = await res.json();
         setMensagem(
           `Erro: ${data.error || "Não foi possível registrar o pagamento."}`
         );
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
       setMensagem(`Erro de conexão: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
+
+  const handleCancelar = () => navigate(`/pedidos`);
 
   const renderMetodoPagamento = () => {
     switch (formData.metodo_pagamento) {
@@ -91,10 +145,9 @@ const PagamentosPage = () => {
         return (
           <>
             <div className="form-group">
-              <label htmlFor="bandeira">Bandeira</label>
+              <label>Bandeira</label>
               <input
                 type="text"
-                id="bandeira"
                 name="bandeira"
                 value={formData.bandeira}
                 onChange={handleChange}
@@ -103,10 +156,9 @@ const PagamentosPage = () => {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="ultimos4">Últimos 4 dígitos</label>
+                <label>Últimos 4 dígitos</label>
                 <input
                   type="text"
-                  id="ultimos4"
                   name="ultimos4"
                   value={formData.ultimos4}
                   onChange={handleChange}
@@ -115,10 +167,9 @@ const PagamentosPage = () => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="parcelas">Parcelas</label>
+                <label>Parcelas</label>
                 <input
                   type="number"
-                  id="parcelas"
                   name="parcelas"
                   value={formData.parcelas}
                   onChange={handleChange}
@@ -128,13 +179,13 @@ const PagamentosPage = () => {
             </div>
           </>
         );
+
       case "PIX":
         return (
           <div className="form-group">
-            <label htmlFor="chave_pix">Chave PIX</label>
+            <label>Chave PIX</label>
             <input
               type="text"
-              id="chave_pix"
               name="chave_pix"
               value={formData.chave_pix}
               onChange={handleChange}
@@ -142,17 +193,16 @@ const PagamentosPage = () => {
             />
           </div>
         );
+
       case "DINHEIRO":
         const troco =
-          (parseFloat(formData.valor_pago) || 0) -
-          formData.valor_centavos / 100;
+          (parseFloat(formData.valor_pago) || 0) - formData.valor_centavos / 100;
         return (
           <>
             <div className="form-group">
-              <label htmlFor="valor_pago">Valor Pago pelo Cliente (R$)</label>
+              <label>Valor Pago pelo Cliente (R$)</label>
               <input
                 type="number"
-                id="valor_pago"
                 name="valor_pago"
                 value={formData.valor_pago}
                 onChange={handleChange}
@@ -167,6 +217,7 @@ const PagamentosPage = () => {
             )}
           </>
         );
+
       default:
         return null;
     }
@@ -202,10 +253,7 @@ const PagamentosPage = () => {
                     formData.metodo_pagamento === "PIX" ? "active" : ""
                   }`}
                   onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      metodo_pagamento: "PIX",
-                    }))
+                    setFormData({ ...formData, metodo_pagamento: "PIX" })
                   }
                 >
                   <FaPix /> PIX
@@ -216,10 +264,7 @@ const PagamentosPage = () => {
                     formData.metodo_pagamento === "CARTAO" ? "active" : ""
                   }`}
                   onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      metodo_pagamento: "CARTAO",
-                    }))
+                    setFormData({ ...formData, metodo_pagamento: "CARTAO" })
                   }
                 >
                   <FaCreditCard /> Cartão
@@ -230,10 +275,7 @@ const PagamentosPage = () => {
                     formData.metodo_pagamento === "DINHEIRO" ? "active" : ""
                   }`}
                   onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      metodo_pagamento: "DINHEIRO",
-                    }))
+                    setFormData({ ...formData, metodo_pagamento: "DINHEIRO" })
                   }
                 >
                   <FaMoneyBillWave /> Dinheiro
@@ -242,14 +284,12 @@ const PagamentosPage = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="id_pagamento">ID do Pagamento *</label>
+              <label>ID do Pagamento</label>
               <input
                 type="text"
-                id="id_pagamento"
                 name="id_pagamento"
                 value={formData.id_pagamento}
                 onChange={handleChange}
-                required
                 placeholder="Ex: PAG-2025-001"
               />
             </div>
@@ -258,7 +298,14 @@ const PagamentosPage = () => {
 
             <div className="form-actions">
               <button type="submit" className="btn btn-success">
-                <FaCheck /> Confirmar Pagamento
+                Confirmar Pagamento
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleCancelar}
+              >
+                Cancelar
               </button>
             </div>
           </form>

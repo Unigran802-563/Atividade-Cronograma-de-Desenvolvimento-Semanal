@@ -269,31 +269,29 @@
   width: 100%;
   justify-content: flex-end;
   padding-top: var(--espacamento-sm);
-  border-top: 1px solid var(--cor-preto-claro); /* Separador mais sutil */
+  border-top: 1px solid var(--cor-preto-claro);
 }
 
 .btn-editar,
 .btn-deletar {
   background-color: transparent;
-  border: 2px solid transparent;
+  border: none;
   padding: var(--espacamento-xs);
   font-size: 1.5rem;
   cursor: pointer;
   border-radius: var(--border-radius-sm);
-  transition: var(--transition-fast);
+  transition: transform 0.2s ease;
   line-height: 1;
 }
 
-.btn-editar:hover {
-  background-color: var(--cor-roxo);
-  border-color: var(--cor-roxo);
-  color: white;
+.btn-editar:hover,
+.btn-deletar:hover {
+  transform: scale(1.2);
 }
 
-.btn-deletar:hover {
-  background-color: #EF4444;
-  border-color: #EF4444;
-  color: white;
+.btn-editar:hover svg,
+.btn-deletar:hover svg {
+  color: inherit;
 }
 
 /* Responsividade */

@@ -66,9 +66,9 @@ function Sidebar() {
         <p>© 2025 SOS Restaurante</p>
         <h3>Equipe:</h3>
         <ul>
+          <li>Caren Naomi Aguero Ito</li>
           <li>Flávia Teruya de Oliveira</li>
           <li>João Gustavo Paiva Deboleto</li>
-          <li>Caren Naomi Aguero Ito</li>
         </ul>
       </div>
     </aside>

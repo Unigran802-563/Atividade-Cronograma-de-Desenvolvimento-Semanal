@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaEdit, FaTrash, FaCheck, FaPlus } from "react-icons/fa";
-import { BsCheckCircleFill, BsXCircleFill } from "react-icons/bs";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import "./PratoPage.css";
 
 function PratoPage() {
@@ -11,10 +10,11 @@ function PratoPage() {
     descricao: "",
     preco: "",
     categoria: "",
-    disponivel: true,
   });
   const [editando, setEditando] = useState(false);
   const [pratoEditId, setPratoEditId] = useState(null);
+  const [mensagem, setMensagem] = useState("");
+  const [mensagemTipo, setMensagemTipo] = useState("");
 
   useEffect(() => {
     carregarPratos();
@@ -24,89 +24,100 @@ function PratoPage() {
     try {
       const response = await fetch("http://localhost:3001/pratos");
       const data = await response.json();
-      console.log("Pratos carregados:", data); // Debug
       setPratos(data);
     } catch (error) {
       console.error("Erro ao carregar pratos:", error);
+      exibirMensagem("Erro ao carregar pratos!");
     }
+  };
+
+  const limparMensagem = (tempo = 3000) => {
+    setTimeout(() => {
+      setMensagem("");
+      setMensagemTipo("");
+    }, tempo);
+  };
+
+  const exibirMensagem = (texto, tipo = "erro", tempo = 3000) => {
+    setMensagem(texto);
+    setMensagemTipo(tipo);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    limparMensagem(tempo);
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let newValue = value;
+
+    if (name === "preco") {
+      newValue = newValue.replace(",", ".");
+    }
+
     setFormData({
       ...formData,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : newValue,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !formData.id_prato ||
-      !formData.nome ||
-      !formData.categoria ||
-      formData.preco === ""
-    ) {
-      alert("Preencha todos os campos obrigatórios!");
-      return;
+    const camposObrigatorios = ["id_prato", "nome", "categoria", "preco"];
+    for (const campo of camposObrigatorios) {
+      if (!formData[campo]?.trim()) {
+        exibirMensagem(`O campo "${campo}" é obrigatório!`);
+        return;
+      }
     }
 
-    if (parseFloat(formData.preco) < 0) {
-      alert("O preço não pode ser negativo!");
+    const precoNum = parseFloat(formData.preco);
+    if (isNaN(precoNum) || precoNum < 0) {
+      exibirMensagem("Informe um preço válido maior ou igual a zero!");
       return;
     }
 
     if (!editando && pratos.some((p) => p.id_prato === formData.id_prato)) {
-      alert("ID do prato já cadastrado!");
+      exibirMensagem("ID do prato já cadastrado!");
       return;
     }
 
     const pratoData = {
       id_prato: formData.id_prato,
-      ...formData,
-      preco: Math.round(parseFloat(formData.preco) * 100),
+      nome: formData.nome.trim(),
+      descricao: formData.descricao.trim(),
+      categoria: formData.categoria,
+      preco_centavos: Math.round(precoNum * 100),
     };
 
     try {
-      if (editando) {
-        const response = await fetch(
-          `http://localhost:3001/pratos/${pratoEditId}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(pratoData),
-          }
+      const url = editando
+        ? `http://localhost:3001/pratos/${pratoEditId}`
+        : "http://localhost:3001/pratos";
+      const method = editando ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pratoData),
+      });
+
+      if (response.ok) {
+        exibirMensagem(
+          editando
+            ? "Prato atualizado com sucesso!"
+            : "Prato cadastrado com sucesso!",
+          "sucesso"
         );
-
-        if (response.ok) {
-          alert("Prato atualizado com sucesso!");
-        } else {
-          const errorData = await response.json();
-          console.error("Erro ao atualizar:", errorData);
-          alert("Erro ao atualizar prato!");
-        }
+        limparFormulario();
+        carregarPratos();
       } else {
-        const response = await fetch("http://localhost:3001/pratos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(pratoData),
-        });
-
-        if (response.ok) {
-          alert("Prato cadastrado com sucesso!");
-        } else {
-          const errorData = await response.json();
-          console.error("Erro ao cadastrar:", errorData);
-          alert("Erro ao cadastrar prato!");
-        }
+        const errorData = await response.json();
+        console.error("Erro:", errorData);
+        exibirMensagem("Erro ao salvar prato!");
       }
-
-      limparFormulario();
-      carregarPratos();
     } catch (error) {
       console.error("Erro ao salvar prato:", error);
-      alert("Erro ao salvar prato!");
+      exibirMensagem("Erro ao salvar prato!");
     }
   };
 
@@ -115,45 +126,32 @@ function PratoPage() {
       id_prato: prato.id_prato,
       nome: prato.nome,
       descricao: prato.descricao || "",
-      preco: (prato.preco / 100).toFixed(2),
+      preco: (prato.preco_centavos / 100).toString().replace(".", ","),
       categoria: prato.categoria,
-      disponivel: prato.disponivel !== undefined ? prato.disponivel : true,
     });
     setEditando(true);
     setPratoEditId(prato.id_prato);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDeletar = async (prato) => {
-    if (!prato || !prato.id_prato) {
-      console.error(
-        "Erro: ID do prato é nulo ou indefinido. Não é possível deletar."
-      );
-      return;
-    }
     if (
       window.confirm(`Tem certeza que deseja deletar o prato "${prato.nome}"?`)
     ) {
       try {
-        console.log("Deletando prato ID:", prato.id_prato); // Debug
-
         const response = await fetch(
           `http://localhost:3001/pratos/${prato.id_prato}`,
-          {
-            method: "DELETE",
-          }
+          { method: "DELETE" }
         );
-
         if (response.ok) {
-          alert("Prato deletado com sucesso!");
+          exibirMensagem("Prato deletado com sucesso!", "sucesso");
           carregarPratos();
         } else {
-          const errorData = await response.json();
-          console.error("Erro ao deletar:", errorData);
-          alert("Erro ao deletar prato! Verifique o console.");
+          exibirMensagem("Erro ao deletar prato!");
         }
       } catch (error) {
-        console.error("Erro ao deletar prato:", error);
-        alert("Erro ao deletar prato! Verifique o console.");
+        console.error("Erro ao deletar:", error);
+        exibirMensagem("Erro ao deletar prato!");
       }
     }
   };
@@ -165,7 +163,6 @@ function PratoPage() {
       descricao: "",
       preco: "",
       categoria: "",
-      disponivel: true,
     });
     setEditando(false);
     setPratoEditId(null);
@@ -187,12 +184,18 @@ function PratoPage() {
         <p>Cadastre e gerencie os pratos do restaurante</p>
       </div>
 
+      {mensagem && (
+        <div className={`message ${mensagemTipo}`}>
+          <p>{mensagem}</p>
+        </div>
+      )}
+
       <div className="prato-container">
         <div className="prato-form-card">
           <h2>{editando ? "Editar Prato" : "Cadastrar Novo Prato"}</h2>
           <form onSubmit={handleSubmit} className="prato-form">
             <div className="form-group">
-              <label htmlFor="id_prato">ID do Prato *</label>
+              <label htmlFor="id_prato">ID do Prato</label>
               <input
                 type="text"
                 id="id_prato"
@@ -200,13 +203,12 @@ function PratoPage() {
                 value={formData.id_prato}
                 onChange={handleChange}
                 placeholder="Ex: PR001"
-                required
                 disabled={editando}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="nome">Nome do Prato *</label>
+              <label htmlFor="nome">Nome do Prato</label>
               <input
                 type="text"
                 id="nome"
@@ -214,12 +216,11 @@ function PratoPage() {
                 value={formData.nome}
                 onChange={handleChange}
                 placeholder="Ex: Feijoada Completa"
-                required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="descricao">Descrição</label>
+              <label htmlFor="descricao">Descrição (Opicional)</label>
               <textarea
                 id="descricao"
                 name="descricao"
@@ -232,28 +233,24 @@ function PratoPage() {
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="preco">Preço (R$) *</label>
+                <label htmlFor="preco">Preço (R$)</label>
                 <input
-                  type="number"
+                  type="text"
                   id="preco"
                   name="preco"
                   value={formData.preco}
                   onChange={handleChange}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                  required
+                  placeholder="0,00"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="categoria">Categoria *</label>
+                <label htmlFor="categoria">Categoria</label>
                 <select
                   id="categoria"
                   name="categoria"
                   value={formData.categoria}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Selecione...</option>
                   <option value="entrada">Entrada</option>
@@ -263,19 +260,9 @@ function PratoPage() {
               </div>
             </div>
 
-            <div className="form-group checkbox-group"></div>
-
             <div className="form-actions">
               <button type="submit" className="btn btn-success">
-                {editando ? (
-                  <>
-                    <FaCheck /> Atualizar
-                  </>
-                ) : (
-                  <>
-                    <FaPlus /> Cadastrar
-                  </>
-                )}
+                {editando ? "Atualizar" : "Cadastrar"}
               </button>
               {editando && (
                 <button
@@ -297,21 +284,18 @@ function PratoPage() {
               <p className="lista-vazia">Nenhum prato cadastrado ainda.</p>
             ) : (
               pratos.map((prato) => (
-                <div
-                  key={prato.id_prato || `prato-${prato.nome}`}
-                  className="prato-item"
-                >
-                  <div className="prato-info">
-                    <h3>{prato.nome}</h3>
-                    <p className="prato-descricao">{prato.descricao}</p>
-                    <div className="prato-detalhes">
-                      <span className="prato-preco">
-                        R$ {(prato.preco / 100).toFixed(2)}
-                      </span>
-                      <span className="prato-categoria">
-                        {formatarCategoria(prato.categoria)}
-                      </span>
-                    </div>
+                <div key={prato.id_prato} className="prato-item">
+                  <div className="item-info">
+                    <h3>Prato: {prato.nome}</h3>
+                    <p>ID: {prato.id_prato}</p>
+                    <p>Descrição: {prato.descricao || "Sem descrição"}</p>
+                    <p>
+                      Preço: R${" "}
+                      {(prato.preco_centavos / 100)
+                        .toFixed(2)
+                        .replace(".", ",")}
+                    </p>
+                    <p>Categoria: {formatarCategoria(prato.categoria)}</p>
                   </div>
                   <div className="prato-acoes">
                     <button

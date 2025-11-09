@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import "./style.css";
 
 const EnderecosPage = () => {
@@ -22,13 +23,23 @@ const EnderecosPage = () => {
     fetchEnderecos();
   }, []);
 
+  useEffect(() => {
+    if (mensagem) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      const timer = setTimeout(() => setMensagem(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [mensagem]);
+
   const fetchEnderecos = async () => {
     try {
       const res = await fetch(`${API_URL}/enderecos`);
       const data = await res.json();
       setEnderecos(data);
     } catch (err) {
-      console.error(`Erro ao buscar endereços: ${err.message}`);
+      setMensagem(`Erro ao buscar endereços: ${err.message}`);
+      setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -73,6 +84,7 @@ const EnderecosPage = () => {
       if (!formData[campo]?.trim()) {
         setMensagem(`O campo "${campo}" é obrigatório!`);
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
     }
@@ -80,12 +92,14 @@ const EnderecosPage = () => {
     if (!/^\d{5}-\d{3}$/.test(formData.cep)) {
       setMensagem("CEP inválido! Use o formato 99999-999.");
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     if (formData.estado.length !== 2) {
       setMensagem("O campo Estado (UF) deve ter exatamente 2 letras.");
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -97,6 +111,7 @@ const EnderecosPage = () => {
     if (idDuplicado) {
       setMensagem("ID de endereço já cadastrado!");
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -114,8 +129,14 @@ const EnderecosPage = () => {
 
       const data = await res.json();
       if (res.ok) {
-        setMensagem(editandoId ? "Endereço atualizado!" : "Endereço criado!");
+        setMensagem(
+          editandoId
+            ? "Endereço atualizado com sucesso!"
+            : "Endereço cadastrado com sucesso!"
+        );
         setMensagemTipo("sucesso");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        fetchEnderecos();
         setFormData({
           id_endereco: "",
           rua: "",
@@ -126,14 +147,15 @@ const EnderecosPage = () => {
           cep: "",
         });
         setEditandoId(null);
-        fetchEnderecos();
       } else {
         setMensagem(`Erro: ${data.error}`);
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
       setMensagem(`Erro: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -141,6 +163,7 @@ const EnderecosPage = () => {
     setFormData({ ...endereco });
     setEditandoId(endereco.id_endereco);
     setMensagem("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancelar = () => {
@@ -158,123 +181,133 @@ const EnderecosPage = () => {
   };
 
   const handleDeletar = async (id) => {
-    const isConfirmed = prompt(
-      `Deseja realmente deletar o endereço ID ${id}? Digite 'SIM' para confirmar.`
-    );
-    if (isConfirmed !== "SIM") return;
+    if (!window.confirm("Deseja realmente deletar este endereço?")) return;
 
     try {
       const res = await fetch(`${API_URL}/endereco/${id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
       if (res.ok) {
-        setMensagem("Endereço deletado!");
+        setMensagem("Endereço deletado com sucesso!");
         setMensagemTipo("sucesso");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         fetchEnderecos();
-      } else {
-        setMensagem(`Erro: ${data.error}`);
-        setMensagemTipo("erro");
       }
     } catch (err) {
       setMensagem(`Erro: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   return (
-    <div className="container">
-      {mensagem && (
-        <p className={`mensagem ${mensagemTipo === "erro" ? "erro" : ""}`}>
-          {mensagem}
-        </p>
-      )}
+    <div className="page-container">
+      <header className="page-header">
+        <h1>Gerenciamento de Endereços</h1>
+        <p>Cadastre e gerencie os endereços do sistema.</p>
+      </header>
 
-      <div className="enderecos-container">
-        {/* CARD DE CADASTRO */}
-        <div className="endereco-form-card">
-          <h2>Cadastro de Endereço</h2>
+      {mensagem && <div className={`message ${mensagemTipo}`}>{mensagem}</div>}
 
-          <form onSubmit={handleSubmit} className="form-cadastro">
-            <label>ID Endereço</label>
-            <input
-              type="text"
-              name="id_endereco"
-              placeholder="ID Endereço"
-              value={formData.id_endereco}
-              onChange={handleChange}
-              required
-              disabled={editandoId}
-            />
-            <label>Rua</label>
-            <input
-              type="text"
-              name="rua"
-              placeholder="Rua"
-              value={formData.rua}
-              onChange={handleChange}
-              required
-            />
-            <label>Número</label>
-            <input
-              type="text"
-              name="numero"
-              placeholder="Número"
-              value={formData.numero}
-              onChange={handleChange}
-              required
-            />
-            <label>Bairro</label>
-            <input
-              type="text"
-              name="bairro"
-              placeholder="Bairro"
-              value={formData.bairro}
-              onChange={handleChange}
-              required
-            />
-            <label>Cidade</label>
-            <input
-              type="text"
-              name="cidade"
-              placeholder="Cidade"
-              value={formData.cidade}
-              onChange={handleChange}
-              required
-            />
-            <label>Estado (UF)</label>
-            <input
-              type="text"
-              name="estado"
-              placeholder="Ex: SP"
-              value={formData.estado}
-              onChange={handleChange}
-              maxLength={2}
-              required
-            />
-            <label>CEP</label>
-            <input
-              type="text"
-              name="cep"
-              placeholder="99999-999"
-              value={formData.cep}
-              onChange={handleChange}
-              required
-            />
+      <div className="main-container">
+        <div className="form-card">
+          <h2>{editandoId ? "Editar Endereço" : "Novo Endereço"}</h2>
+          <form onSubmit={handleSubmit} className="main-form">
+            <div className="form-group">
+              <label>ID Endereço</label>
+              <input
+                type="text"
+                name="id_endereco"
+                value={formData.id_endereco}
+                onChange={handleChange}
+                placeholder="Ex: END-001"
+                required
+                disabled={!!editandoId}
+              />
+            </div>
 
-            {/* Botões centralizados e maiores */}
-            <div className="botoes-container">
-              <button
-                type="submit"
-                className={editandoId ? "atualizar" : "cadastrar"}
-              >
+            <div className="form-group">
+              <label>Rua</label>
+              <input
+                type="text"
+                name="rua"
+                value={formData.rua}
+                onChange={handleChange}
+                placeholder="Ex: Rua das Flores"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Número</label>
+              <input
+                type="text"
+                name="numero"
+                value={formData.numero}
+                onChange={handleChange}
+                placeholder="Ex: 123A"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Bairro</label>
+              <input
+                type="text"
+                name="bairro"
+                value={formData.bairro}
+                onChange={handleChange}
+                placeholder="Ex: Centro"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Cidade</label>
+              <input
+                type="text"
+                name="cidade"
+                value={formData.cidade}
+                onChange={handleChange}
+                placeholder="Ex: São Paulo"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Estado (UF)</label>
+              <input
+                type="text"
+                name="estado"
+                value={formData.estado}
+                onChange={handleChange}
+                placeholder="Ex: SP"
+                maxLength={2}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>CEP</label>
+              <input
+                type="text"
+                name="cep"
+                value={formData.cep}
+                onChange={handleChange}
+                placeholder="Ex: 12345-678"
+                required
+              />
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="btn btn-success">
                 {editandoId ? "Atualizar" : "Cadastrar"}
               </button>
               {editandoId && (
                 <button
                   type="button"
                   onClick={handleCancelar}
-                  className="cancelar"
+                  className="btn btn-secondary"
                 >
                   Cancelar
                 </button>
@@ -283,56 +316,41 @@ const EnderecosPage = () => {
           </form>
         </div>
 
-        {/* CARD DA LISTA */}
-        <div className="endereco-lista-card">
-          <h3>Lista de Endereços</h3>
+        <div className="lista-card">
+          <h2>Endereços Cadastrados</h2>
           {enderecos.length === 0 ? (
-            <p className="sem-registro">Nenhum endereço cadastrado ainda.</p>
+            <p className="lista-vazia">Nenhum endereço cadastrado.</p>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table className="tabela-cadastro">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Rua</th>
-                    <th>Número</th>
-                    <th>Bairro</th>
-                    <th>Cidade</th>
-                    <th>Estado</th>
-                    <th>CEP</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {enderecos.map((e) => (
-                    <tr key={e.id_endereco}>
-                      <td>{e.id_endereco}</td>
-                      <td>{e.rua}</td>
-                      <td>{e.numero}</td>
-                      <td>{e.bairro}</td>
-                      <td>{e.cidade}</td>
-                      <td>{e.estado}</td>
-                      <td>{e.cep}</td>
-                      <td>
-                        <div className="button-group">
-                          <button
-                            className="editar"
-                            onClick={() => handleEditar(e)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            className="deletar"
-                            onClick={() => handleDeletar(e.id_endereco)}
-                          >
-                            Deletar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="lista-grid">
+              {enderecos.map((e) => (
+                <div className="item-card" key={e.id_endereco}>
+                  <div className="item-info">
+                    <h3>ID: {e.id_endereco}</h3>
+                    <p>Rua: {e.rua}</p>
+                    <p>Número: {e.numero}</p>
+                    <p>Bairro: {e.bairro}</p>
+                    <p>Cidade: {e.cidade}</p>
+                    <p>Estado: {e.estado}</p>
+                    <p>CEP: {e.cep}</p>
+                  </div>
+                  <div className="item-acoes">
+                    <button
+                      className="btn-icon btn-edit"
+                      onClick={() => handleEditar(e)}
+                      title="Editar"
+                    >
+                      <FaEdit color="#10B981" />
+                    </button>
+                    <button
+                      className="btn-icon btn-delete"
+                      onClick={() => handleDeletar(e.id_endereco)}
+                      title="Deletar"
+                    >
+                      <FaTrash color="#EF4444" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

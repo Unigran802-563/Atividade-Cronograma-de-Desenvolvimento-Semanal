@@ -151,3 +151,14 @@
 .tabela-temporaria .actions-cell {
   width: 50px; /* Define uma largura fixa para a célula de ação */
 }
+
+.no-data {
+  text-align: center;
+  margin-top: var(--espacamento-sm);
+}
+
+.message.info {
+  color: var(--cor-texto-secundario);
+  font-size: 0.95rem;
+  margin-bottom: var(--espacamento-xs);
+}

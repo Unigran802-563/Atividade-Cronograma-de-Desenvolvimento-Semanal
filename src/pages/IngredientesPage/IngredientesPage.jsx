@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import "./IngredientesPage.css"; // Importa o CSS final
-import { FaEdit, FaTrash, FaPlus, FaCheck } from "react-icons/fa";
+import "./IngredientesPage.css";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const IngredientesPage = () => {
   const [ingredientes, setIngredientes] = useState([]);
@@ -19,6 +19,14 @@ const IngredientesPage = () => {
     fetchIngredientes();
   }, []);
 
+  useEffect(() => {
+    if (mensagem) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      const timer = setTimeout(() => setMensagem(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [mensagem]);
+
   const fetchIngredientes = async () => {
     try {
       const res = await fetch(`${API_URL}/ingredientes`);
@@ -27,6 +35,7 @@ const IngredientesPage = () => {
     } catch (err) {
       setMensagem(`Erro ao buscar ingredientes: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -35,14 +44,15 @@ const IngredientesPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !formData.id_ingrediente ||
-      !formData.nome ||
-      !formData.unidade_medida
-    ) {
-      setMensagem("Todos os campos são obrigatórios!");
-      setMensagemTipo("erro");
-      return;
+
+    const camposObrigatorios = ["id_ingrediente", "nome", "unidade_medida"];
+    for (const campo of camposObrigatorios) {
+      if (!formData[campo]?.trim()) {
+        setMensagem(`O campo "${campo}" é obrigatório!`);
+        setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
     }
 
     if (!editandoId) {
@@ -52,6 +62,7 @@ const IngredientesPage = () => {
       if (idExistente) {
         setMensagem("Esse ID já existe! Escolha outro para o ingrediente.");
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
     }
@@ -76,15 +87,21 @@ const IngredientesPage = () => {
             : "Ingrediente cadastrado com sucesso!"
         );
         setMensagemTipo("sucesso");
-        handleCancelar();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
         fetchIngredientes();
+
+        setFormData({ id_ingrediente: "", nome: "", unidade_medida: "" });
+        setEditandoId(null);
       } else {
         setMensagem(`Erro: ${data.error || "Ocorreu um problema."}`);
         setMensagemTipo("erro");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
       setMensagem(`Erro de conexão: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -92,7 +109,7 @@ const IngredientesPage = () => {
     setFormData({ ...ingrediente });
     setEditandoId(ingrediente.id_ingrediente);
     setMensagem("");
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancelar = () => {
@@ -118,9 +135,11 @@ const IngredientesPage = () => {
         );
         setMensagemTipo("erro");
       }
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setMensagem(`Erro de conexão: ${err.message}`);
       setMensagemTipo("erro");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -138,7 +157,7 @@ const IngredientesPage = () => {
           <h2>{editandoId ? "Editar Ingrediente" : "Novo Ingrediente"}</h2>
           <form onSubmit={handleSubmit} className="main-form">
             <div className="form-group">
-              <label htmlFor="id_ingrediente">ID do Ingrediente *</label>
+              <label htmlFor="id_ingrediente">ID do Ingrediente</label>
               <input
                 type="text"
                 id="id_ingrediente"
@@ -151,7 +170,7 @@ const IngredientesPage = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="nome">Nome do Ingrediente *</label>
+              <label htmlFor="nome">Nome do Ingrediente</label>
               <input
                 type="text"
                 id="nome"
@@ -163,7 +182,7 @@ const IngredientesPage = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="unidade_medida">Unidade de Medida *</label>
+              <label htmlFor="unidade_medida">Unidade de Medida</label>
               <select
                 id="unidade_medida"
                 name="unidade_medida"
@@ -182,15 +201,7 @@ const IngredientesPage = () => {
 
             <div className="form-actions">
               <button type="submit" className="btn btn-success">
-                {editandoId ? (
-                  <>
-                    <FaCheck /> Atualizar
-                  </>
-                ) : (
-                  <>
-                    <FaPlus /> Cadastrar
-                  </>
-                )}
+                {editandoId ? "Atualizar" : "Cadastrar"}
               </button>
               {editandoId && (
                 <button
@@ -205,7 +216,6 @@ const IngredientesPage = () => {
           </form>
         </div>
 
-        {/* === MUDANÇA PRINCIPAL AQUI: de <table> para grid de <div> === */}
         <div className="lista-card">
           <h2>Ingredientes Cadastrados</h2>
           {ingredientes.length === 0 ? (
@@ -215,11 +225,9 @@ const IngredientesPage = () => {
               {ingredientes.map((i) => (
                 <div className="item-card" key={i.id_ingrediente}>
                   <div className="item-info">
-                    <span className="item-id">{i.id_ingrediente}</span>
-                    <h3>{i.nome}</h3>
-                    <div className="item-detalhes">
-                      <span className="item-unidade">{i.unidade_medida}</span>
-                    </div>
+                    <h3>ID: {i.id_ingrediente}</h3>
+                    <p>Nome: {i.nome}</p>
+                    <p>Unidade de medida: {i.unidade_medida}</p>
                   </div>
                   <div className="item-acoes">
                     <button
