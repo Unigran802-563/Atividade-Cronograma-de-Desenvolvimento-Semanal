@@ -93,7 +93,7 @@
 }
 
 .form-row {
-  display: grid;
+  display: flex;
   grid-template-columns: 1fr 1fr;
   gap: var(--espacamento-md);
 }

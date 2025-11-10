@@ -220,7 +220,7 @@ function PratoPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="descricao">Descrição (Opicional)</label>
+              <label htmlFor="descricao">Descrição (Opcional)</label>
               <textarea
                 id="descricao"
                 name="descricao"
@@ -230,9 +230,7 @@ function PratoPage() {
                 rows="3"
               />
             </div>
-
-            <div className="form-row">
-              <div className="form-group">
+<div className="form-group">
                 <label htmlFor="preco">Preço (R$)</label>
                 <input
                   type="text"
@@ -243,7 +241,7 @@ function PratoPage() {
                   placeholder="0,00"
                 />
               </div>
-
+            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="categoria">Categoria</label>
                 <select
