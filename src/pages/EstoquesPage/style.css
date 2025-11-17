@@ -1,245 +1,389 @@
-/* ========================================
-   ARQUIVO: src/pages/PratoPage.css
-   PADRÃO VISUAL: Gerenciamento de Estoque
-   ======================================== */
-
-.prato-page {
-  min-height: 100vh;
-  background-color: var(--cor-preto);
-  color: var(--cor-texto-principal);
-  padding: 60px 6%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+:root {
+  --cor-preto: #111827;
+  --cor-preto-claro: #1F2937;
+  --cor-cinza-escuro: #374151;
+  --cor-roxo-claro: #A78BFA;
+  --cor-verde: #059669;
+  --cor-verde-claro: #10B981;
+  --cor-verde-escuro: #047857;
+  --espacamento-xs: 4px;
+  --espacamento-sm: 8px;
+  --espacamento-md: 16px;
+  --espacamento-lg: 24px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
+  --transition-fast: 0.2s ease-in-out;
+  --transition-normal: 0.3s ease-in-out;
 }
 
-/* ====== Cabeçalho ====== */
+.page-container {
+  padding: var(--espacamento-md);
+  min-height: 100vh;
+  background-color: var(--cor-preto);
+  color: #fff;
+}
+
 .page-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: var(--espacamento-lg);
 }
 
 .page-header h1 {
-  font-size: 2.5rem;
-  color: var(--cor-roxo);
-  font-weight: 700;
-  margin-bottom: 10px;
+  font-size: 2.4rem;
+  color: var(--cor-roxo-claro);
+  margin-bottom: var(--espacamento-xs);
 }
 
 .page-header p {
-  font-size: 1.1rem;
-  color: var(--cor-texto-secundario);
+  font-size: 1rem;
+  color: #fff;
 }
 
-/* ====== Container Principal ====== */
-.prato-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 40px;
-  flex-wrap: wrap;
-  width: 100%;
-  max-width: 1200px;
-}
-
-/* ====== Cards ====== */
-.prato-form-card,
-.prato-lista-card {
-  flex: 1;
-  background: linear-gradient(145deg, #141414, #0b0b0b);
-  border: 1.5px solid var(--cor-roxo);
-  border-radius: 14px;
-  box-shadow: 0 0 15px rgba(167, 139, 250, 0.15);
-  padding: 30px;
-  min-width: 350px;
-  max-width: 550px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.prato-form-card:hover,
-.prato-lista-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
-}
-
-.prato-form-card h2,
-.prato-lista-card h2 {
-  color: var(--cor-roxo);
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 25px;
+.message {
+  padding: var(--espacamento-sm);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--espacamento-md);
   text-align: center;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+  color: #fff;
+  transition: opacity var(--transition-fast);
 }
 
-/* ====== Formulário ====== */
-.prato-form {
+.message.sucesso {
+  background: linear-gradient(90deg, var(--cor-verde), var(--cor-verde-claro));
+  color: #000;
+}
+
+.message.erro {
+  background: linear-gradient(90deg, #EF4444, #F87171);
+  color: #000;
+}
+
+.main-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--espacamento-lg);
+  width: 100%;
+  align-items: center;
+}
+
+.form-card {
+  background: linear-gradient(145deg, var(--cor-preto-claro), var(--cor-cinza-escuro));
+  padding: var(--espacamento-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 98%;
+  max-width: 1200px;
+  min-height: 700px;
+  margin: 0 auto;
+  transition: all var(--transition-normal);
+}
+
+.form-card h2 {
+  text-align: center;
+  margin-bottom: var(--espacamento-md);
+  color: var(--cor-roxo-claro);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  margin-bottom: var(--espacamento-md);
 }
 
 .form-group label {
+  margin-bottom: var(--espacamento-xs);
+  color: #fff;
   font-weight: 500;
-  font-size: 0.95rem;
-  color: var(--cor-texto-principal);
+  text-align: left;
 }
 
 .form-group input,
-.form-group select,
-.form-group textarea {
-  background-color: #1e1e1e;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 10px;
-  color: var(--cor-texto-principal);
-  font-size: 1rem;
-  transition: 0.2s ease;
+.form-group select {
+  padding: var(--espacamento-xs);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--cor-cinza-escuro);
+  background-color: var(--cor-preto);
+  color: #fff;
+  transition: all var(--transition-fast);
 }
 
 .form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: var(--cor-roxo);
+.form-group select:focus {
   outline: none;
+  border-color: var(--cor-roxo-claro);
+  box-shadow: 0 0 8px var(--cor-roxo-claro);
+}
+
+.input-unidade {
+  display: flex;
+  align-items: center;
+}
+
+.badge-unidade {
+  display: inline-block;
+  background-color: #6D28D9;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 5px;
 }
 
 .form-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  justify-content: center;
+  gap: var(--espacamento-sm);
+  margin-top: var(--espacamento-md);
 }
 
-.btn {
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+.form-actions .btn {
+  min-width: 120px;
+}
+
+.form-actions .btn-success {
+  background: linear-gradient(90deg, #047857, #059669);
+  color: #fff;
   font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s ease;
 }
 
-.btn-success {
-  background-color: var(--cor-verde);
-  color: white;
+.form-actions .btn-success:hover {
+  background: linear-gradient(90deg, #059669, #10B981);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
-.btn-success:hover {
-  background-color: var(--cor-verde-escuro);
+.form-actions .btn-secondary {
+  background: linear-gradient(90deg, #7F1D1D, #B91C1C);
+  color: #fff;
+  font-weight: 600;
 }
 
-.btn-secondary {
-  background-color: #333;
-  color: var(--cor-texto-principal);
+.form-actions .btn-secondary:hover {
+  background: linear-gradient(90deg, #B91C1C, #EF4444);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
-.btn-secondary:hover {
-  background-color: #444;
+.lista-card {
+  background: linear-gradient(145deg, var(--cor-preto-claro), var(--cor-cinza-escuro));
+  padding: var(--espacamento-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 98%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* ====== Lista de Pratos ====== */
-.prato-lista {
+.lista-card h2 {
+  text-align: center;
+  margin-bottom: var(--espacamento-md);
+  color: var(--cor-roxo-claro);
+}
+
+.item-card {
+  background: linear-gradient(135deg, var(--cor-preto), var(--cor-preto-claro));
+  padding: var(--espacamento-md);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 6px;
+  transition: all var(--transition-normal);
+  margin-bottom: var(--espacamento-md);
+}
+
+.item-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.item-card.estoque-baixo {
+  background: linear-gradient(135deg, #7F1D1D, #B91C1C);
+  border: 2px solid #EF4444;
+}
+
+.item-card.estoque-baixo::before {
+  content: "⚠ Estoque baixo!";
+  display: block;
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: var(--espacamento-xs);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.item-info h3 {
+  text-align: left;
+  font-size: 1.2rem;
+  margin-bottom: var(--espacamento-xs);
+  color: #fff;
+  font-weight: 600;
+}
+
+.item-info p {
+  text-align: left;
+  color: #fff;
+  margin: var(--espacamento-xs) 0;
+  font-size: 0.9rem;
+}
+
+.item-acoes {
+  display: flex;
+  justify-content: center;
+  gap: var(--espacamento-sm);
+  margin-top: var(--espacamento-sm);
+}
+
+.btn-icon {
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon svg {
+  font-size: 1.2rem;
+}
+
+.btn-edit svg {
+  color: var(--cor-verde);
+  transition: all var(--transition-fast);
+}
+
+.btn-edit:hover svg {
+  color: var(--cor-verde-escuro);
+  transform: scale(1.3);
+}
+
+.btn-delete svg {
+  color: #EF4444;
+  transition: all var(--transition-fast);
+}
+
+.btn-delete:hover svg {
+  color: #B91C1C;
+  transform: scale(1.3);
+}
+
+.message {
+  opacity: 1;
+}
+
+.message.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.sem-endereco,
+.sem-ingrediente {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--espacamento-sm);
+  text-align: center;
+}
+
+.sem-endereco p,
+.sem-ingrediente p {
+  margin-bottom: var(--espacamento-xs);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.sem-endereco .btn,
+.sem-ingrediente .btn {
+  background: linear-gradient(90deg, var(--cor-verde-escuro), var(--cor-verde));
+  color: #fff;
+  font-weight: 600;
+  padding: var(--espacamento-sm) var(--espacamento-md);
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.sem-endereco .btn:hover,
+.sem-ingrediente .btn:hover {
+  background: linear-gradient(90deg, var(--cor-verde), var(--cor-verde-claro));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .lista-vazia {
-  text-align: center;
-  font-style: italic;
-  color: var(--cor-texto-secundario);
-}
-
-/* ====== Item da Lista ====== */
-.prato-item {
-  background-color: #1b1b1b;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 15px;
-  transition: 0.2s ease;
-}
-
-.prato-item:hover {
-  border-color: var(--cor-roxo);
-  transform: translateY(-2px);
-}
-
-.prato-info h3 {
-  font-size: 1.1rem;
-  color: var(--cor-texto-principal);
-  margin-bottom: 6px;
-}
-
-.prato-descricao {
-  font-size: 0.9rem;
-  color: var(--cor-texto-secundario);
-  margin-bottom: 10px;
-}
-
-.prato-detalhes {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  color: var(--cor-verde);
+  justify-content: center;
+  padding: var(--espacamento-lg);
+  margin-top: var(--espacamento-md);
+  background: linear-gradient(145deg, var(--cor-preto-claro), var(--cor-cinza-escuro));
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.lista-vazia p {
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: var(--espacamento-md);
+}
+
+.lista-vazia .btn {
+  background: linear-gradient(90deg, var(--cor-verde-escuro), var(--cor-verde));
+  color: #fff;
   font-weight: 600;
-}
-
-.prato-acoes {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.btn-editar,
-.btn-deletar {
-  background: none;
+  padding: var(--espacamento-sm) var(--espacamento-md);
   border: none;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  font-size: 1.2rem;
-  color: var(--cor-texto-secundario);
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition: all var(--transition-fast);
+  text-align: center;
 }
 
-.btn-editar:hover {
-  color: var(--cor-verde);
-  transform: scale(1.1);
+.lista-vazia .btn:hover {
+  background: linear-gradient(90deg, var(--cor-verde), var(--cor-verde-claro));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
-.btn-deletar:hover {
-  color: #ef4444;
-  transform: scale(1.1);
+@media (max-width: 1200px) {
+
+  .form-card,
+  .lista-card {
+    width: 95%;
+    max-width: 1000px;
+  }
 }
 
-/* ====== Scrollbar Customizada ====== */
-.prato-lista::-webkit-scrollbar {
-  width: 6px;
+@media (max-width: 900px) {
+
+  .form-card,
+  .lista-card {
+    width: 95%;
+    max-width: 700px;
+  }
 }
 
-.prato-lista::-webkit-scrollbar-thumb {
-  background-color: var(--cor-roxo);
-  border-radius: 4px;
-}
+@media (max-width: 600px) {
 
-/* ====== Responsividade ====== */
-@media (max-width: 1024px) {
-  .prato-container {
-    flex-direction: column;
-    align-items: center;
+  .form-card,
+  .lista-card {
+    width: 100%;
+    padding: var(--espacamento-sm);
   }
 
-  .prato-form-card,
-  .prato-lista-card {
-    max-width: 90%;
+  .item-info h3 {
+    font-size: 1.1rem;
+  }
+
+  .item-info p {
+    font-size: 0.85rem;
   }
 }
